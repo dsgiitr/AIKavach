@@ -8,15 +8,19 @@ from algo import calc_fast_beta_th, check
 import numpy as np
 from random import random
 from multiprocessing.pool import Pool, ThreadPool
+from scipy.stats import norm
+from statsmodels.stats.proportion import proportion_confint
 
 workers = 10
 ORIG_R_EPS = 5e-5
 DUAL_EPS = 1e-8
 
 class FinishedModel():
-    def __init__(self, raw_model, denoiser, d, k, num_classes, dist_1, dist_2, std_1, std_2, alpha) -> None:
+    def __init__(self, raw_model, denoiser, d, k, num_classes, dist_1, dist_2, std_1, std_2, alpha, num_sampling_min = 20) -> None:
+        self.num_sampling_min = num_sampling_min
         self.model = raw_model
         self.model.eval()
+        # the line below is temporary until denoiser stuff is integrated
         self.stacked_model = self.model
         self.denoiser = denoiser
         if self.denoiser is not None:
@@ -56,21 +60,38 @@ class FinishedModel():
         else:
             raise NotImplementedError('Unsupported smoothing distribution')
 
-    def label_inference_without_certification(self, x, num_sampling, batch_size = 16):
+    def label_inference_without_certification(self, x, num_sampling, fractional_loss, batch_size = 1):
         """""
         Expects x's dimensions to be in the order N, C, H, W
         """""
-        nA_1, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = num_sampling // 2, num_classes = self.num_classes,  batch_size = batch_size)
-        nA_2, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = num_sampling // 2, num_classes = self.num_classes, batch_size = batch_size)
+        nA1_1, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes,  batch_size = batch_size)
+        nA2_1, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size)
+        p1low_1, p1high_1 = smooth.confidence_bound(nA1_1[nA1_1.argmax().item()].item(), realN_1, self.alpha)
+        p2low_2, p2high_2 = smooth.confidence_bound(nA2_1[nA2_1.argmax().item()].item(), realN_2, self.alpha)
+        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha, self.num_sampling_min)
+        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha, self.num_sampling_min)
+        nA1_2, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes,  batch_size = batch_size)
+        nA2_2, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size)
+        nA_1 = nA1_1 + nA1_2
+        nA_2 = nA2_1 + nA2_2
         nA = nA_1 + nA_2
+        print('meow meow')
         return nA.argmax()
 
-    def logits_inference_without_certification(self, x, num_sampling, batch_size = 16):
+    def logits_inference_without_certification(self, x, num_sampling, fractional_loss, batch_size = 1):
         """""
         Expects x's dimensions to be in the order N, C, H, W
         """""
-        nA_1, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = num_sampling // 2, num_classes = self.num_classes,  batch_size = batch_size)
-        nA_2, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = num_sampling // 2, num_classes = self.num_classes, batch_size = batch_size)
+        nA1_1, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes,  batch_size = batch_size)
+        nA2_1, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size)
+        p1low_1, p1high_1 = smooth.confidence_bound(nA1_1[nA1_1.argmax().item()].item(), realN_1, self.alpha)
+        p2low_2, p2high_2 = smooth.confidence_bound(nA2_1[nA2_1.argmax().item()].item(), realN_2, self.alpha)
+        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha, self.num_sampling_min)
+        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha, self.num_sampling_min)
+        nA1_2, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes,  batch_size = batch_size)
+        nA2_2, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size)
+        nA_1 = nA1_1 + nA1_2
+        nA_2 = nA2_1 + nA2_2
         nA = nA_1 + nA_2
         return F.softmax(torch.Tensor(nA)).detach().numpy()
 
@@ -196,17 +217,70 @@ class FinishedModel():
                 res = self.new_radius_pool_func(view)
                 print("meow meow")
         return res
-                
 
-    def inference_and_certification(self, x, num_sampling, batch_size = 16):
+    def find_opt_batchnum(self, iss, pa_lower, pa_upper):
+        print("yha se shru")
+        # print(iss)
+        list_p = list(iss.keys())
+        pa_lower = np.clip(pa_lower, 0.0, 1.0)
+        pa_upper = np.clip(pa_upper, 0.0, 1.0)
+        print(pa_lower)
+        for i, p in enumerate(list_p):
+            if pa_lower <= p:
+                opt_batchnum = max(iss[list_p[max(0,i - 1)]], iss[p])
+                break
+        for i, p in enumerate(list_p):
+            if pa_upper <= p:
+                opt_batchnum = max(opt_batchnum, iss[list_p[max(0,i - 1)]], iss[p])
+                break
+        print(opt_batchnum)
+        print("yha khatm")
+        return opt_batchnum
+
+    def generate_iss(self, loss, batch_size, upper, sigma, alpha) -> dict:
+        iss = {}
+        max_sample_size = upper * batch_size
+        for pa in list(np.arange(500 + 1) * 0.001+0.5):
+            iss[pa] = upper
+            opt_radius = sigma * norm.ppf(
+                proportion_confint(max_sample_size * pa, max_sample_size, alpha, method="beta")[0])
+            standard = opt_radius*(1- loss)
+            if standard <= 0:
+                iss[pa] = 0
+            else:
+                for num in range(upper + 1):
+                    sample_size = num * batch_size
+                    if sigma * norm.ppf(proportion_confint(max_sample_size * pa, max_sample_size, alpha, method="beta")[0]) >= standard:
+                        iss[pa] = num
+                        break
+        return iss
+
+    def get_opt_num_sampling(self, plow, phigh, n_max, fractional_loss_in_radius, batch_size, sigma, alpha, n_min = 10):
+        iss = self.generate_iss(fractional_loss_in_radius, batch_size, n_max//batch_size, sigma, alpha)
+        opt = self.find_opt_batchnum(iss, plow, phigh)
+        return opt
+
+    def inference_and_certification(self, x, num_sampling, fractional_loss, batch_size = 1):
         """""
         Expects x's dimensions to be in the order N, C, H, W
         """""
-        nA_1, realN_1 = smooth.sample_noise(model = self.stacked_model, x = x, dist = self.dist_1, num = num_sampling // 2, num_classes = self.num_classes,  batch_size = batch_size)
-        nA_2, realN_2 = smooth.sample_noise(model = self.stacked_model, x = x, dist = self.dist_2, num = num_sampling // 2, num_classes = self.num_classes, batch_size = batch_size)
+        nA1_1, realN_1_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes,  batch_size = batch_size)
+        nA2_1, realN_2_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size)
+        p1low_1, p1high_1 = smooth.confidence_bound(nA1_1[nA1_1.argmax().item()].item(), realN_1_1, self.alpha)
+        p2low_2, p2high_2 = smooth.confidence_bound(nA2_1[nA2_1.argmax().item()].item(), realN_2_1, self.alpha)
+        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha, self.num_sampling_min)
+        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha, self.num_sampling_min)
+        # print(num_opt_1)
+        # exit()
+        nA1_2, realN_1_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes,  batch_size = batch_size)
+        nA2_2, realN_2_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size)
+        nA_1 = nA1_1 + nA1_2
+        nA_2 = nA2_1 + nA2_2
         nA = nA_1 + nA_2
-        p1low_1, p1high_1 = smooth.confidence_bound(nA_1, realN_1, self.alpha)
-        p1low_2, p1high_2 = smooth.confidence_bound(nA_2, realN_2, self.alpha)
+        realN_1 = realN_1_1 + realN_1_2
+        realN_2 = realN_2_1 + realN_2_2
+        p1low_1, p1high_1 = smooth.confidence_bound(nA_1[nA_1.argmax().item()].item(), realN_1, self.alpha)
+        p1low_2, p1high_2 = smooth.confidence_bound(nA_2[nA_1.argmax().item()].item(), realN_2, self.alpha)
         now_r, now_time = self.orig_radius_pool_func(p1high_1, self.dist_1)
         full_info = [0, now_r, p1low_1, p1high_1, [[p1low_2, p1high_2]]]
         r = self.bunk_radius_calc(full_info, self.dist_name_2, self.num_dims, self.k, self.std_1, self.std_2, 'fast')
@@ -247,6 +321,7 @@ if __name__ == '__main__':
     model = ChotaModel()
     secure_model = FinishedModel(model, None, 784, 380, 10, 'general-gaussian', 'general-gaussian', 0.5, 0.4, 0.0005)
     x = torch.zeros((28, 28)).float()
-    logits, r = secure_model.inference_and_certification(x, 100)
-    print(f"logits are is: {logits}")
+    logits = secure_model.label_inference_without_certification(x, 100, 0.1)
+    # logits, r = secure_model.inference_and_certification(x, 100, 0.01)
+    print(f"logits are: {logits}")
     print('meow meow')

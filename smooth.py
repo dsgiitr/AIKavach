@@ -82,6 +82,8 @@ def confidence_bound(NA: int, N: int, alpha: float) -> (float, float):
     :param alpha: the confidence level
     :return: a lower bound on the binomial proportion which holds true w.p at least (1 - alpha) over the samples
     """
+    print(f"NA: {NA}")
+    print(f"N: {N}")
     ret = proportion_confint(NA, N, alpha=alpha, method="beta")
     return ret[0], ret[1]
 
