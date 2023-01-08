@@ -10,22 +10,18 @@ from random import random
 from multiprocessing.pool import Pool, ThreadPool
 from scipy.stats import norm
 from statsmodels.stats.proportion import proportion_confint
+from icecream import ic
 
 workers = 10
 ORIG_R_EPS = 5e-5
 DUAL_EPS = 1e-8
 
 class FinishedModel():
-    def __init__(self, raw_model, denoiser, d, k, num_classes, dist_1, dist_2, std_1, std_2, alpha, num_sampling_min = 20) -> None:
+    def __init__(self, denoised_model, d, k, num_classes, dist_1, dist_2, std_1, std_2, alpha, num_sampling_min = 20) -> None:
         self.num_sampling_min = num_sampling_min
-        self.model = raw_model
-        self.model.eval()
+        self.denoised_model = denoised_model
+        self.denoised_model.eval()
         # the line below is temporary until denoiser stuff is integrated
-        self.stacked_model = self.model
-        self.denoiser = denoiser
-        if self.denoiser is not None:
-            self.denoiser.eval()
-        # self.stacked_model = self.model(self.denoiser)
         self.num_dims = d
         self.alpha = alpha
         self.k = k
@@ -35,28 +31,28 @@ class FinishedModel():
         self.std_1 = std_1
         self.std_2 = std_2
         if dist_1 == 'gaussian':
-            self.dist_1 = StandardGaussian(self.num_dims, std_1)
+            self.dist_1 = StandardGaussian(self.num_dims, std_1, eps = 0.01)
         elif dist_1 == 'general-gaussian':
-            self.dist_1 = GeneralGaussian(self.num_dims, self.k, std_1, th = 1.0)
+            self.dist_1 = GeneralGaussian(self.num_dims, self.k, std_1, th = 1.0, eps = 0.01)
         elif dist_1 == 'infty-gaussian':
-            self.dist_1 = LinftyGaussian(self.num_dims, std_1)
+            self.dist_1 = LinftyGaussian(self.num_dims, std_1, eps = 0.01)
         elif dist_1 == 'infty-general-gaussian':
-            self.dist_1 = LinftyGeneralGaussian(self.num_dims, self.k, std_1)
+            self.dist_1 = LinftyGeneralGaussian(self.num_dims, self.k, std_1, eps = 0.01)
         elif dist_1 == 'L1-general-gaussian':
-            self.dist_1 = L1GeneralGaussian(self.num_dims, self.k, std_1)
+            self.dist_1 = L1GeneralGaussian(self.num_dims, self.k, std_1, eps = 0.01)
         else:
             raise NotImplementedError('Unsupported smoothing distribution')
 
         if dist_2 == 'gaussian':
-            self.dist_2 = StandardGaussian(self.num_dims, std_2)
+            self.dist_2 = StandardGaussian(self.num_dims, std_2, eps = 0.01)
         elif dist_2 == 'general-gaussian':
-            self.dist_2 = GeneralGaussian(self.num_dims, self.k, std_2, th = 1.0)
+            self.dist_2 = GeneralGaussian(self.num_dims, self.k, std_2, th = 1.0, eps = 0.01)
         elif dist_2 == 'infty-gaussian':
-            self.dist_2 = LinftyGaussian(self.num_dims, std_2)
+            self.dist_2 = LinftyGaussian(self.num_dims, std_2, eps = 0.01)
         elif dist_2 == 'infty-general-gaussian':
-            self.dist_2 = LinftyGeneralGaussian(self.num_dims, self.k, std_2)
+            self.dist_2 = LinftyGeneralGaussian(self.num_dims, self.k, std_2, eps = 0.01)
         elif dist_2 == 'L1-general-gaussian':
-            self.dist_2 = L1GeneralGaussian(self.num_dims, self.k, std_2)
+            self.dist_2 = L1GeneralGaussian(self.num_dims, self.k, std_2, eps = 0.01)
         else:
             raise NotImplementedError('Unsupported smoothing distribution')
 
@@ -64,32 +60,31 @@ class FinishedModel():
         """""
         Expects x's dimensions to be in the order N, C, H, W
         """""
-        nA1_1, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes,  batch_size = batch_size)
-        nA2_1, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size)
+        nA1_1, realN_1 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
+        nA2_1, realN_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
         p1low_1, p1high_1 = smooth.confidence_bound(nA1_1[nA1_1.argmax().item()].item(), realN_1, self.alpha)
         p2low_2, p2high_2 = smooth.confidence_bound(nA2_1[nA2_1.argmax().item()].item(), realN_2, self.alpha)
-        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha, self.num_sampling_min)
-        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha, self.num_sampling_min)
-        nA1_2, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes,  batch_size = batch_size)
-        nA2_2, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size)
+        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha)
+        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha)
+        nA1_2, realN_1 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
+        nA2_2, realN_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
         nA_1 = nA1_1 + nA1_2
         nA_2 = nA2_1 + nA2_2
         nA = nA_1 + nA_2
-        print('meow meow')
         return nA.argmax()
 
     def logits_inference_without_certification(self, x, num_sampling, fractional_loss, batch_size = 1):
         """""
         Expects x's dimensions to be in the order N, C, H, W
         """""
-        nA1_1, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes,  batch_size = batch_size)
-        nA2_1, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size)
+        nA1_1, realN_1 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
+        nA2_1, realN_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
         p1low_1, p1high_1 = smooth.confidence_bound(nA1_1[nA1_1.argmax().item()].item(), realN_1, self.alpha)
         p2low_2, p2high_2 = smooth.confidence_bound(nA2_1[nA2_1.argmax().item()].item(), realN_2, self.alpha)
-        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha, self.num_sampling_min)
-        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha, self.num_sampling_min)
-        nA1_2, realN_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes,  batch_size = batch_size)
-        nA2_2, realN_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size)
+        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha)
+        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha)
+        nA1_2, realN_1 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
+        nA2_2, realN_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
         nA_1 = nA1_1 + nA1_2
         nA_2 = nA2_1 + nA2_2
         nA = nA_1 + nA_2
@@ -176,7 +171,7 @@ class FinishedModel():
         return no, new_r, new_r - orig_r, ((new_r - orig_r) / max(orig_r, 1e-5)), runtime
 
 
-    def bunk_radius_calc(self, full_info, disttype, d, k, sigma, betas, mode, unit=0.05, eps=0.0001):
+    def bunk_radius_calc(self, full_info, disttype, d, k, sigma, betas, mode, unit=0.05, eps=0.01):
         """
         The entrance function, or the dispatcher, for the improved radius computation
         :param full_info: the full info list, [[no, radius, p1low, p1high, [[p2low, p2high], ...]]
@@ -215,16 +210,13 @@ class FinishedModel():
                 print(f"full info: {full_info}")
                 view = [full_info[0], full_info[1], full_info[2], full_info[3], full_info[4][0][0], full_info[4][0][1]]
                 res = self.new_radius_pool_func(view)
-                print("meow meow")
-        return res
+        _, r, __, ___, ____ = res
+        return r
 
     def find_opt_batchnum(self, iss, pa_lower, pa_upper):
-        print("yha se shru")
-        # print(iss)
         list_p = list(iss.keys())
         pa_lower = np.clip(pa_lower, 0.0, 1.0)
         pa_upper = np.clip(pa_upper, 0.0, 1.0)
-        print(pa_lower)
         for i, p in enumerate(list_p):
             if pa_lower <= p:
                 opt_batchnum = max(iss[list_p[max(0,i - 1)]], iss[p])
@@ -233,29 +225,30 @@ class FinishedModel():
             if pa_upper <= p:
                 opt_batchnum = max(opt_batchnum, iss[list_p[max(0,i - 1)]], iss[p])
                 break
-        print(opt_batchnum)
-        print("yha khatm")
         return opt_batchnum
+
+    def _lower_confidence_bound(self, NA, N, alpha: float) -> float:
+        return proportion_confint(NA, N, alpha=2 * alpha, method="beta")[0]
+
 
     def generate_iss(self, loss, batch_size, upper, sigma, alpha) -> dict:
         iss = {}
         max_sample_size = upper * batch_size
         for pa in list(np.arange(500 + 1) * 0.001+0.5):
             iss[pa] = upper
-            opt_radius = sigma * norm.ppf(
-                proportion_confint(max_sample_size * pa, max_sample_size, alpha, method="beta")[0])
+            opt_radius = sigma * norm.ppf(self._lower_confidence_bound(max_sample_size * pa, max_sample_size, alpha))
             standard = opt_radius*(1- loss)
             if standard <= 0:
                 iss[pa] = 0
             else:
                 for num in range(upper + 1):
                     sample_size = num * batch_size
-                    if sigma * norm.ppf(proportion_confint(max_sample_size * pa, max_sample_size, alpha, method="beta")[0]) >= standard:
+                    if sigma * norm.ppf(self._lower_confidence_bound(sample_size * pa, sample_size, alpha)) >= standard:
                         iss[pa] = num
                         break
         return iss
 
-    def get_opt_num_sampling(self, plow, phigh, n_max, fractional_loss_in_radius, batch_size, sigma, alpha, n_min = 10):
+    def get_opt_num_sampling(self, plow, phigh, n_max, fractional_loss_in_radius, batch_size, sigma, alpha):
         iss = self.generate_iss(fractional_loss_in_radius, batch_size, n_max//batch_size, sigma, alpha)
         opt = self.find_opt_batchnum(iss, plow, phigh)
         return opt
@@ -264,16 +257,14 @@ class FinishedModel():
         """""
         Expects x's dimensions to be in the order N, C, H, W
         """""
-        nA1_1, realN_1_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes,  batch_size = batch_size)
-        nA2_1, realN_2_1 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size)
+        nA1_1, realN_1_1 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
+        nA2_1, realN_2_1 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
         p1low_1, p1high_1 = smooth.confidence_bound(nA1_1[nA1_1.argmax().item()].item(), realN_1_1, self.alpha)
         p2low_2, p2high_2 = smooth.confidence_bound(nA2_1[nA2_1.argmax().item()].item(), realN_2_1, self.alpha)
-        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha, self.num_sampling_min)
-        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha, self.num_sampling_min)
-        # print(num_opt_1)
-        # exit()
-        nA1_2, realN_1_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes,  batch_size = batch_size)
-        nA2_2, realN_2_2 = smooth.get_logits(model = self.stacked_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size)
+        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha)
+        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha)
+        nA1_2, realN_1_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
+        nA2_2, realN_2_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
         nA_1 = nA1_1 + nA1_2
         nA_2 = nA2_1 + nA2_2
         nA = nA_1 + nA_2
@@ -284,7 +275,6 @@ class FinishedModel():
         now_r, now_time = self.orig_radius_pool_func(p1high_1, self.dist_1)
         full_info = [0, now_r, p1low_1, p1high_1, [[p1low_2, p1high_2]]]
         r = self.bunk_radius_calc(full_info, self.dist_name_2, self.num_dims, self.k, self.std_1, self.std_2, 'fast')
-        print(r)
         return F.softmax(torch.Tensor(nA)).detach().numpy(), r
 
 class ChotaModel(nn.Module):
@@ -319,9 +309,12 @@ class ChotaModel(nn.Module):
 
 if __name__ == '__main__':
     model = ChotaModel()
-    secure_model = FinishedModel(model, None, 784, 380, 10, 'general-gaussian', 'general-gaussian', 0.5, 0.4, 0.0005)
-    x = torch.zeros((28, 28)).float()
-    logits = secure_model.label_inference_without_certification(x, 100, 0.1)
-    # logits, r = secure_model.inference_and_certification(x, 100, 0.01)
-    print(f"logits are: {logits}")
-    print('meow meow')
+    secure_model = FinishedModel(model, 784, 380, 10, 'general-gaussian', 'general-gaussian', 0.5, 0.4, 0.0005, num_sampling_min = 100)
+    x = torch.randn((28, 28)).float()
+    label = secure_model.label_inference_without_certification(x, 1_000, 0.01, batch_size = 64)
+    logits_old = secure_model.logits_inference_without_certification(x, 1000, 0.01, batch_size = 64)
+    logits, r = secure_model.inference_and_certification(x, 100, 0.01, batch_size = 64)
+    ic(label)
+    ic(logits_old)
+    print(f"logits are: {logits}, radius is {r}")
+    print('meow meow') 

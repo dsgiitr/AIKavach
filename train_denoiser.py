@@ -3,7 +3,6 @@ import torch.nn as nn
 import time
 import cv2
 
-
 class denoiser(nn.Module):
     def __init__(self) -> None:
         super().__init__()

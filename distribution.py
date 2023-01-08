@@ -289,6 +289,8 @@ class GeneralGaussian(Distribution):
             r_lb, r_ub = 0.0, self.sigma * norm.ppf(pA) * np.sqrt(1.0 - 2.0 * self.k / self.d)
             print(f'!!! pA={pA}')
             while r_ub - r_lb > self.eps:
+                # if r_ub - r_lb < 0.01:
+                #     break
                 print(f'binary search r in [{r_lb}, {r_ub}]')
                 r_mid = (r_lb + r_ub) / 2.0
                 logK = _binary_search_logK(self.d, self.k, self.sigma, r_mid, pA)

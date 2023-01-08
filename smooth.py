@@ -3,11 +3,13 @@ from scipy.stats import norm, binom_test
 import numpy as np
 from math import ceil
 from statsmodels.stats.proportion import proportion_confint
+from torchvision.transforms import RandomCrop
+from icecream import ic
 
 from distribution import Distribution
 
 
-def sample_noise(model: torch.nn.Module, x: torch.tensor, dist: Distribution, num: int, num_classes: int, batch_size: int) -> np.ndarray:
+def sample_noise(model: torch.nn.Module, x: torch.tensor, dist: Distribution, num: int, num_classes: int, batch_size: int, num_crop: int) -> np.ndarray:
     """ Sample the base classifier's prediction under noisy corruptions of the input x.
 
     :param x: the input [channel x width x height]
@@ -18,28 +20,26 @@ def sample_noise(model: torch.nn.Module, x: torch.tensor, dist: Distribution, nu
     model.to('cuda')
     x = x.cuda()
     tot = num
+    random_cropper = RandomCrop((x[0].shape[2], x[0].shape[3]))
     with torch.no_grad():
         label = torch.squeeze(model(x)).detach().argmax().item()
         counts = 0
-        for i in range(ceil(num / batch_size)):
-            print('batch', i, 'num', num, end='\r', flush=True)
+        for i in range(ceil(num / batch_size*num_crop)):
+            if num <= 0:
+                break
             this_batch_size = min(batch_size, num)
-            num -= this_batch_size
-
+            num -= this_batch_size*num_crops
             batch = x.repeat((this_batch_size, 1, 1, 1))
-            # noise = dist.sample(this_batch_size).astype(np.float32)
             noise = dist.sample(this_batch_size, cuda=True)
             noise = torch.tensor(noise, device='cuda').resize_as(batch)
-            predictions = model(batch + noise).argmax(1)
-            counts += np.sum(predictions.cpu().numpy() == label)
-            # for idx in predictions.cpu().numpy():
-            #     counts[idx] += 1
+            for j in range(num_crop):
+                predictions = model(random_cropper(batch) + noise).argmax(1)
+                counts += np.sum(torch.squeeze(predictions).item() == label)
             if counts <= 1000 and tot - num >= 4000:
-                # early halt
                 break
-        return counts, tot - num
+    return counts, tot - num
 
-def get_logits(model: torch.nn.Module, x: torch.tensor, dist: Distribution, num: int, num_classes: int, batch_size: int):
+def get_logits(model: torch.nn.Module, x: torch.tensor, dist: Distribution, num: int, num_classes: int, batch_size: int, num_crop: int):
     """ Sample the base classifier's prediction under noisy corruptions of the input x.
 
     :param x: the input [channel x width x height]
@@ -50,25 +50,22 @@ def get_logits(model: torch.nn.Module, x: torch.tensor, dist: Distribution, num:
     model.to('cuda')
     x = x.cuda()
     tot = num
+    random_cropper = RandomCrop((x.shape[-2], x.shape[-1]))
     with torch.no_grad():
         counts = np.zeros(num_classes, dtype=int)
-        for i in range(ceil(num / batch_size)):
-            print('batch', i, 'num', num, end='\r', flush=True)
+        for i in range(ceil(num / batch_size*num_crop)):
+            if num <= 0:
+                break
             this_batch_size = min(batch_size, num)
-            num -= this_batch_size
-
+            num -= this_batch_size*num_crop
             batch = x.repeat((this_batch_size, 1, 1, 1))
-            # noise = dist.sample(this_batch_size).astype(np.float32)
             noise = dist.sample(this_batch_size, cuda=True)
             noise = torch.tensor(noise, device='cuda').resize_as(batch)
-            predictions = model(batch + noise).argmax(1)
-            # counts += np.sum(predictions.cpu().numpy() == label)
-            for idx in predictions.cpu().numpy():
-                counts[idx] += 1
-            # if counts <= 1000 and tot - num >= 4000:
-            #     # early halt
-            #     break
-        return counts, tot - num
+            for j in range(num_crop):
+                predictions = model(random_cropper(batch) + noise).argmax(1)
+                for idx in predictions:
+                    counts[idx.item()] += 1
+    return counts, tot - num
 
 
 
@@ -82,8 +79,6 @@ def confidence_bound(NA: int, N: int, alpha: float) -> (float, float):
     :param alpha: the confidence level
     :return: a lower bound on the binomial proportion which holds true w.p at least (1 - alpha) over the samples
     """
-    print(f"NA: {NA}")
-    print(f"N: {N}")
     ret = proportion_confint(NA, N, alpha=alpha, method="beta")
     return ret[0], ret[1]
 
