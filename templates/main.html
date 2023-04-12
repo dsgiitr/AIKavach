@@ -1,34 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>AISec</title>
     <style>
         body {
             background-color: #89CFF0;
             margin-left: 75px;
-    
             font-family: Sans-serif;
-        }
-    
-        h1 {
-            font-size: 100px;
-    
+        }h1 {
+            font-size: 65px;
         }
     </style>
-</head>
-<body>
+   <script>  
+        function update() {  
+            console.log("hello");
+            var mylist = document.getElementById("dataset");  
+            var x = mylist.options[mylist.selectedIndex].value; 
+            console.log(x); 
+        }  
+    </script>     
+  </head>
+<body>   
+    
     <div style="display: flex">
+        
         <form action="http://localhost:5000/uploader"" method = " POST" enctype="multipart/form-data">
-            <h1 style="margin-top:150px;">AISec</h1>
-            <input type="file" name="file" />
-            <input type="submit" style="margin-top:5px; width: 90px;" class="btn btn-primary" />
+            <h1 style="margin-top:15px;">AISec</h1>
+            <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Model Field</span>
+            <select class="form-control" name="model_field" id="model_field" aria-label="Username" aria-describedby="basic-addon1">
+                <option class="form-control" value="resnet50">Resnet50</option>
+                <option class="form-control" value="cifar_resnet20">Cifar Resnet20</option>
+                <option class="form-control" value="cifar_resnet110">Cifar Resnet110</option>
+                <option class="form-control" value="mnist_43">Mnist_43</option>
+                <option class="form-control" value="wide_resnet_imagenet64">Wide Resnet imagenet64</option>
+            </select>
+            </div>
+            <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1" >Dataset</span>
+            <select id="dataset" class="form-control" onchange="update()" aria-label="Username" aria-describedby="basic-addon1">
+                <option value="380" class="form-control">mnist</option>
+                <option value="1450" class="form-control">cifar</option>
+            </select>
+            </div>
+            <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Sigma</span>
+            <input type="number" class="form-control" id="sigma" name="sigma" min="0" max="1" step=".01" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Distribution</span>
+            <select name="distribution" class="form-control" id="distribution" aria-label="Username" aria-describedby="basic-addon1">
+                <option class="form-control" value="general_gaussian">General Gaussian</option>
+                <option class="form-control" value="standard_gaussian">Standard Gaussian</option>
+                <option class="form-control" value="truncated_general_gaussian">Truncated General Gaussian</option>
+                <option class="form-control" value="truncated_standard_gaussian">Truncated Standard Gaussian</option>
+            </select>
+            </div>
+            <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1" >N</span>
+            <input type="number" class="form-control" id="n" name="n" step="100" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Alpha</span>
+            <input type="number" class="form-control" id="alpha" name="alpha" step=".001" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Batch Size</span>
+            <input type="number" class="form-control" id="batch_size" name="batch_size" step="1" value="400" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="mb-3">
+                <input class="form-control" type="file" id="formFile">
+            </div>
+            <input type="submit" style="margin-top:5px; width: 90px;" class="btn btn-dark"/>
         </form>
-        <div style="margin-left:300px; margin-top:100px">
+        <div style="margin-left:200px; margin-top:135px">
             <img src="https://media.istockphoto.com/id/1280478624/vector/robot-or-bot-reading-ai-exercise-book.jpg?s=612x612&w=0&k=20&c=qDmpUu2sfzayFfYGsy_BqdW2e91bsh1QnjHbHCyHvJY="
                 style="width: 480px; height: 350px" alt="Italian Trulli">
         </div>
