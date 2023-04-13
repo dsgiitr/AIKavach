@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import torch
+import cv2
 import torch.utils.data as data
 import utils_image as util
 
@@ -14,6 +15,7 @@ class DatasetFDnCNN(data.Dataset):
     # e.g., FDnCNN, H = f(cat(L, M)), M is noise level map
     # -----------------------------------------
     """
+    
 
     def __init__(self, n_c=3,H_size=64, sigma=[0,75],sigma_test=25,dataroot_H='trainsets/trainH'):
         super(DatasetFDnCNN, self).__init__()
@@ -28,6 +30,7 @@ class DatasetFDnCNN(data.Dataset):
         # get the path of H, return None if input is None
         # -------------------------------------
         self.paths_H = util.get_image_paths(dataroot_H)
+        
 
     def __getitem__(self, index):
         # -------------------------------------
@@ -35,8 +38,10 @@ class DatasetFDnCNN(data.Dataset):
         # -------------------------------------
         H_path = self.paths_H[index]
         img_H = util.imread_uint(H_path, self.n_channels)
+        # cv2.imshow(img_H)
 
         L_path = H_path
+        
 
         if 'train' == 'train':
             """
@@ -102,8 +107,13 @@ class DatasetFDnCNN(data.Dataset):
         # -------------------------------------
         """
         img_L = torch.cat((img_L, noise_level_map), 0)
+        # print(f'L: {img_L}, H: {img_H}, L_path: {L_path}, H_path: {H_path}')
 
         return {'L': img_L, 'H': img_H, 'L_path': L_path, 'H_path': H_path}
+    
 
     def __len__(self):
         return len(self.paths_H)
+    
+dataset = DatasetFDnCNN()
+print(dataset.__len__())
