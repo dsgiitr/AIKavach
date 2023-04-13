@@ -156,8 +156,7 @@ class denoiser():
         print(len(train_loader))
 
         for epoch in range(epochs):  # keep running
-            print('epoch:',epoch)
-            
+                        
             # if opt['dist']:
             #     train_sampler.set_epoch(epoch)
             for i, train_data in enumerate(train_loader):
