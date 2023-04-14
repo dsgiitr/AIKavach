@@ -13,8 +13,14 @@ app = Flask(__name__)
 # def receiver():
 #     return 0 
 
-@app.route('/')
+@app.route('/', methods=["GET", "POST"])
 def main_page():
+    if request.method == 'POST':
+        # getting input with name = fname in HTML form
+        print(request.form)
+        f = request.files['file']
+        f.save(secure_filename(f.filename))
+        return render_template("uploader.html")
     return render_template("main.html")
 
 # @app.route('/upload')
@@ -31,15 +37,6 @@ def main_page():
 #     </html>
 #     """
 #    return render_template('./abcd.html')
-
-	
-@app.route('/uploader', methods = ['POST'])
-def get_uploaded_file():
-    if request.method == 'POST':
-        f = request.files['file']
-        f.save(secure_filename(f.filename))
-    return render_template("uploader.html")
-    
 		
 if __name__ == '__main__':
    app.run(debug = True)

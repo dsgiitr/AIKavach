@@ -30,7 +30,7 @@
     
     <div style="display: flex">
         
-        <form action="http://localhost:5000/uploader"" method = " POST" enctype="multipart/form-data">
+        <form action="{{ url_for('main_page') }}" method = "POST" enctype="multipart/form-data">
             <h1 style="margin-top:15px;">AISec</h1>
             <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Model Field</span>
@@ -75,7 +75,7 @@
             <input type="number" class="form-control" id="batch_size" name="batch_size" step="1" value="400" aria-label="Username" aria-describedby="basic-addon1">
             </div>
             <div class="mb-3">
-                <input class="form-control" type="file" id="formFile">
+                <input class="form-control" type="file" id="formFile" name="file">
             </div>
             <input type="submit" style="margin-top:5px; width: 90px;" class="btn btn-dark"/>
         </form>
