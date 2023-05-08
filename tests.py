@@ -15,7 +15,7 @@ class TestFinishedModel(unittest.TestCase):
         self.model = FinishedModel(self.denoised, 784, 380, 10, 'general-gaussian', 'general-gaussian', 0.5, 0.4, 0.0005, num_sampling_min = 100)
         self.x = torch.randn((28, 28)).float()
 
-    def num_samples(self):
+    def test_num_samples(self):
         num_sampling = 20000
         fractional_loss = 0.02
         batch_size = 64
