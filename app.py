@@ -115,7 +115,7 @@ def calculate_denoised_form():
         print(request.form.get("model_id"))
         model_id = int(request.form.get("model_id"))
         model_dict = models[model_id]
-        denoised_model = f"/denoised/model_{current_form_request_id}.pth"
+        denoised_model = f"/denoised/model_{model_id}.pth"
         p1 = subprocess.Popen(['python', 'train.py','-e', '1', '-n', f'{denoised_model}'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out1, err1 = p1.communicate()
         if err1:
