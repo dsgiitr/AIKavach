@@ -10,7 +10,7 @@ parser.add_argument('--input_dims', type=list, default=[3, 32, 32], help="expect
 args = parser.parse_args()
 
 raw_model = torch.load(args.path_to_pretrained_model)
-
+distributions
 ## get trained denoiser
-## get optimal distributions
+## get optimal 
 

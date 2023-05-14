@@ -48,24 +48,21 @@
             <div id="customFields" style="display:none;">
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon1">n</span>
-                    <input type="number" class="form-control" id="n" name="n" step="100" aria-label="Username"
-                        aria-describedby="basic-addon1">
+                    <input type="number" class="form-control" id="n" name="n" step="100" aria-label="Username" aria-describedby="basic-addon1" default="">
                 </div>
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon1">Number of Examples:</span>
-                    <input type="number" class="form-control" id="examples" name="examples" step="100" aria-label="Username"
-                        aria-describedby="basic-addon1">
+                    <input type="number" class="form-control" id="examples" name="examples" step="100" aria-label="Username" aria-describedby="basic-addon1" default="1000">
                 </div><div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon1">Channels:</span>
-                    <input type="number" class="form-control" id="channels" name="channels" step="1" aria-label="Username" aria-describedby="basic-addon1">
+                    <input type="number" class="form-control" id="channels" name="channels" step="1" aria-label="Username" aria-describedby="basic-addon1" default="1">
                 </div><div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon1">Height:</span>
-                    <input type="number" class="form-control" id="height" name="height" step="1" aria-label="Username" aria-describedby="basic-addon1">
+                    <input type="number" class="form-control" id="height" name="height" step="1" aria-label="Username" aria-describedby="basic-addon1" default="28">
                 </div>
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon1">Width:</span>
-                    <input type="number" class="form-control" id="width" name="width" step="1" aria-label="Username"
-                        aria-describedby="basic-addon1">
+                    <input type="number" class="form-control" id="width" name="width" step="1" aria-label="Username" aria-describedby="basic-addon1" default="28">
                 </div>
                 <div class="mb-3">
                     <input class="form-control" type="file" id="dataset_file" name="dataset_file" accept=".zip"> Zip file only
@@ -88,15 +85,15 @@
             </div>
             <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1" >N</span>
-            <input type="number" class="form-control" id="N" name="N" step="100" aria-label="Username" aria-describedby="basic-addon1">
+            <input type="number" class="form-control" id="N" name="N" step="100" aria-label="Username" aria-describedby="basic-addon1" default="10000">
             </div>
             <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Alpha</span>
-            <input type="number" class="form-control" id="alpha" name="alpha" step=".001" aria-label="Username" aria-describedby="basic-addon1">
+            <input type="number" class="form-control" id="alpha" name="alpha" step=".001" aria-label="Username" aria-describedby="basic-addon1" default=0.001>
             </div>
             <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Batch Size</span>
-            <input type="number" class="form-control" id="batch_size" name="batch_size" step="1" value="400" aria-label="Username" aria-describedby="basic-addon1">
+            <input type="number" class="form-control" id="batch_size" name="batch_size" step="1" value="50" aria-label="Username" aria-describedby="basic-addon1" default="100">
             </div>
             <div class="mb-3">
                 <input class="form-control" type="file" id="formFile" name="model_file" accept=".pth">
