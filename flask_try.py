@@ -1,6 +1,6 @@
 # third-party HTTP client library
 import requests
-from flask import Flask, jsonify, request, Response, render_template
+from flask import Flask, jsonify, request, Response, render_template, redirect
 from werkzeug.utils import secure_filename
 import requests
 import os
@@ -45,62 +45,71 @@ def calculate_np_radius(
       outf.write( 'Reader thread ...\n' )
       outf.write( line.rstrip() + '\n' )
       outf.flush()
+  result = []
+  return result
 
 
-# assume that "app" below is your flask app, and that
-# "Response" is imported from flask.
-
-# @app.route("/abc/")
-# def receiver():
-#     return 0 
+form_dict = []
 
 @app.route('/', methods=["GET", "POST"])
 def main_page():
-# if __name__ == '__main__':
-#     app.run(debug = True)
+  if request.method == 'POST':
+      try: # to prevent empty form from being sent empty
+        f = request.files['model_file']
+        f.save("./models/"+secure_filename(f.filename))  
+      except:
+        return render_template("main.html")
+      example_tested = dict(request.form.lists())
+      if example_tested['dataset'][0] == "custom": # to check whether we have dataset values
+        try:
+          f = request.files['dataset_file']
+          f.save("./custom_datasets/"+secure_filename(f.filename))
+        except:
+          return render_template("main.html")
+      form_dict.append(example_tested)
+      # check if the file has a pth extension
+      return redirect("/uploader")
+  return render_template("main.html")
 
-@app.route('/upload')
-def upload_file():
-    return """
-    <html>
-    <body>
-      <form action = "http://localhost:5000/uploader" method = "POST" 
-         enctype = "multipart/form-data">
-         <input type = "file" name = "file" />
-         <input type = "submit"/>
-      </form>   
-    </body>
-    </html>
-    """
-#    return render_template('./abcd.html')
 
-	
-@app.route('/uploader', methods = ['POST'])
-def get_uploaded_file():
-    if request.method == 'POST':
-        # getting input with name = fname in HTML form
-        print(request.form)
-        f = request.files['file']
-        f.save(secure_filename(f.filename))
-        return render_template("uploader.html")
-        f.save(secure_filename(f.filename)) 
-        calculate_np_radius(f.filename, "resnet")
-        return "file uploaded successfully"
-    return render_template("main.html")
+@app.route('/get_results', methods=["GET"])
+def get_results():
+  # the API that returns results when they are compiled
+  
+  # you just need to add the function here that produce the results and then it is good to go
+  '''
+  def example_func(model):
+    .... run some process 
 
-# @app.route('/upload')
-# def upload_file():
-#     return """
-#     <html>
-#     <body>
-#       <form action = "http://localhost:5000/uploader" method = "POST" 
-#          enctype = "multipart/form-data">
-#          <input type = "file" name = "file" />
-#          <input type = "submit"/>
-#       </form>   
-#     </body>
-#     </html>
-#     """
-#    return render_template('./abcd.html')
+    return results
+
+  # TODO: Make this subAPI in such a manner that it responds to multiple requests at a time using auth and async functions 
+  '''
+  # Execute the first Bash script
+  script1_path = '/path/to/script1.sh'
+  p1 = subprocess.Popen(['bash'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  out1, err1 = p1.communicate()
+
+  # Execute the second Bash script
+  script2_path = '/path/to/script2.sh'
+  p2 = subprocess.Popen(['bash', script2_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  out2, err2 = p2.communicate()
+
+  # Check for any errors
+  if err1 or err2:
+    error = 'An error occurred while executing the scripts'
+    return jsonify({'error': error})
+  results = [
+        {"image_name": "image1.jpg", "object": "person", "confidence": 0.95},
+        {"image_name": "image1.jpg", "object": "car", "confidence": 0.85},
+        {"image_name": "image2.jpg", "object": "dog", "confidence": 0.75},
+        {"image_name": "image2.jpg", "object": "cat", "confidence": 0.65},
+    ]
+  return jsonify(results)
+
+@app.route('/uploader')
+def display_result():
+  return render_template("uploader.html")
+
 if __name__ == '__main__':
    app.run(debug = True)

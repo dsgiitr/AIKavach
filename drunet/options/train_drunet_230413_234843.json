@@ -1,0 +1,116 @@
+{
+  "task": "drunet",
+  "model": "plain",
+  "gpu_ids": [
+    0
+  ],
+  "scale": 1,
+  "n_channels": 3,
+  "sigma": [
+    0,
+    50
+  ],
+  "sigma_test": 25,
+  "path": {
+    "root": "denoising",
+    "pretrained_netG": null,
+    "task": "denoising/drunet",
+    "log": "denoising/drunet",
+    "options": "denoising/drunet/options",
+    "models": "denoising/drunet/models",
+    "images": "denoising/drunet/images",
+    "pretrained_optimizerG": null
+  },
+  "datasets": {
+    "train": {
+      "name": "train_dataset",
+      "dataset_type": "fdncnn",
+      "dataroot_H": "trainsets/trainH",
+      "dataroot_L": null,
+      "H_size": 128,
+      "dataloader_shuffle": true,
+      "dataloader_num_workers": 8,
+      "dataloader_batch_size": 64,
+      "phase": "train",
+      "scale": 1,
+      "n_channels": 3
+    },
+    "test": {
+      "name": "test_dataset",
+      "dataset_type": "fdncnn",
+      "dataroot_H": "testsets/set12",
+      "dataroot_L": null,
+      "phase": "test",
+      "scale": 1,
+      "n_channels": 3
+    }
+  },
+  "netG": {
+    "net_type": "drunet",
+    "in_nc": 4,
+    "out_nc": 3,
+    "nc": [
+      64,
+      128,
+      256,
+      512
+    ],
+    "nb": 4,
+    "gc": 32,
+    "ng": 2,
+    "reduction": 16,
+    "act_mode": "R",
+    "upsample_mode": "convtranspose",
+    "downsample_mode": "strideconv",
+    "bias": false,
+    "init_type": "orthogonal",
+    "init_bn_type": "uniform",
+    "init_gain": 0.2,
+    "scale": 1
+  },
+  "train": {
+    "G_lossfn_type": "l1",
+    "G_lossfn_weight": 1.0,
+    "G_optimizer_type": "adam",
+    "G_optimizer_lr": 0.0001,
+    "G_optimizer_clipgrad": null,
+    "G_scheduler_type": "MultiStepLR",
+    "G_scheduler_milestones": [
+      100000,
+      200000,
+      300000,
+      400000
+    ],
+    "G_scheduler_gamma": 0.5,
+    "G_regularizer_orthstep": null,
+    "G_regularizer_clipstep": null,
+    "checkpoint_test": 5000,
+    "checkpoint_save": 5000,
+    "checkpoint_print": 200,
+    "F_feature_layer": 34,
+    "F_weights": 1.0,
+    "F_lossfn_type": "l1",
+    "F_use_input_norm": true,
+    "F_use_range_norm": false,
+    "G_optimizer_betas": [
+      0.9,
+      0.999
+    ],
+    "G_scheduler_restart_weights": 1,
+    "G_optimizer_wd": 0,
+    "G_optimizer_reuse": false,
+    "G_param_strict": true,
+    "E_param_strict": true,
+    "E_decay": 0
+  },
+  "opt_path": "options/train_drunet.json",
+  "is_train": true,
+  "merge_bn": false,
+  "merge_bn_startpoint": -1,
+  "find_unused_parameters": true,
+  "use_static_graph": false,
+  "dist": false,
+  "num_gpu": 1,
+  "rank": 0,
+  "world_size": 1
+}

@@ -17,13 +17,16 @@
             font-size: 65px;
         }
     </style>
-   <script>  
-        function update() {  
-            console.log("hello");
-            var mylist = document.getElementById("dataset");  
-            var x = mylist.options[mylist.selectedIndex].value; 
-            console.log(x); 
-        }  
+   <script>
+        function toggleCustomFields() {
+                var datasetSelect = document.getElementById("dataset");
+                var customFields = document.getElementById("customFields");
+                if (datasetSelect.value === "custom") {
+                    customFields.style.display = "block";
+                } else {
+                    customFields.style.display = "none";
+                }
+            }
     </script>     
   </head>
 <body>   
@@ -33,22 +36,43 @@
         <form action="{{ url_for('main_page') }}" method = "POST" enctype="multipart/form-data">
             <h1 style="margin-top:15px;">AISec</h1>
             <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1">Model Field</span>
-            <select class="form-control" name="model_field" id="model_field" aria-label="Username" aria-describedby="basic-addon1">
-                <option class="form-control" value="resnet50">Resnet50</option>
-                <option class="form-control" value="cifar_resnet20">Cifar Resnet20</option>
-                <option class="form-control" value="cifar_resnet110">Cifar Resnet110</option>
-                <option class="form-control" value="mnist_43">Mnist_43</option>
-                <option class="form-control" value="wide_resnet_imagenet64">Wide Resnet imagenet64</option>
-            </select>
-            </div>
-            <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1" >Dataset</span>
-            <select id="dataset" class="form-control" onchange="update()" aria-label="Username" aria-describedby="basic-addon1">
-                <option value="380" class="form-control">mnist</option>
-                <option value="1450" class="form-control">cifar</option>
+            <select name="dataset" id="dataset" class="form-control" onchange="toggleCustomFields()" aria-label="Username" aria-describedby="basic-addon1">
+                <option value="mnist" class="form-control">mnist</option>
+                <option value="cifar" class="form-control">cifar</option>
+                <option value="custom" class="form-control">custom</option>
             </select>
             </div>
+            <br>
+            <br>
+            <div id="customFields" style="display:none;">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">n</span>
+                    <input type="number" class="form-control" id="n" name="n" step="100" aria-label="Username"
+                        aria-describedby="basic-addon1">
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">Number of Examples:</span>
+                    <input type="number" class="form-control" id="examples" name="examples" step="100" aria-label="Username"
+                        aria-describedby="basic-addon1">
+                </div><div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">Channels:</span>
+                    <input type="number" class="form-control" id="channels" name="channels" step="1" aria-label="Username" aria-describedby="basic-addon1">
+                </div><div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">Height:</span>
+                    <input type="number" class="form-control" id="height" name="height" step="1" aria-label="Username" aria-describedby="basic-addon1">
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">Width:</span>
+                    <input type="number" class="form-control" id="width" name="width" step="1" aria-label="Username"
+                        aria-describedby="basic-addon1">
+                </div>
+                <div class="mb-3">
+                    <input class="form-control" type="file" id="dataset_file" name="dataset_file" accept=".zip"> Zip file only
+                </div>
+
+            </div>
+            <br><br>
             <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Sigma</span>
             <input type="number" class="form-control" id="sigma" name="sigma" min="0" max="1" step=".01" aria-label="Username" aria-describedby="basic-addon1">
@@ -64,7 +88,7 @@
             </div>
             <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1" >N</span>
-            <input type="number" class="form-control" id="n" name="n" step="100" aria-label="Username" aria-describedby="basic-addon1">
+            <input type="number" class="form-control" id="N" name="N" step="100" aria-label="Username" aria-describedby="basic-addon1">
             </div>
             <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Alpha</span>
@@ -75,9 +99,10 @@
             <input type="number" class="form-control" id="batch_size" name="batch_size" step="1" value="400" aria-label="Username" aria-describedby="basic-addon1">
             </div>
             <div class="mb-3">
-                <input class="form-control" type="file" id="formFile" name="file">
+                <input class="form-control" type="file" id="formFile" name="model_file" accept=".pth">
             </div>
             <input type="submit" style="margin-top:5px; width: 90px;" class="btn btn-dark"/>
+        
         </form>
         <div style="margin-left:200px; margin-top:135px">
             <img src="https://media.istockphoto.com/id/1280478624/vector/robot-or-bot-reading-ai-exercise-book.jpg?s=612x612&w=0&k=20&c=qDmpUu2sfzayFfYGsy_BqdW2e91bsh1QnjHbHCyHvJY="
