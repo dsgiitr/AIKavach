@@ -1,7 +1,5 @@
 # Certify-Net
 
-My Awesome Project
-
 ## Table of Contents
 
 - [Introduction](#introduction)
