@@ -1,4 +1,4 @@
-# Project Name
+# Certify-Net
 
 My Awesome Project
 
@@ -13,7 +13,9 @@ My Awesome Project
 
 ## Introduction
 
-My Awesome Project is a revolutionary application that simplifies complex tasks and enhances productivity. With its intuitive interface and powerful features, it's designed to help users streamline their daily workflows.
+Neural networks (NNs) have achieved great advances on a wide range of classification tasks, but have been shown vulnerable against adversarial examples(adversarial pertubations) and thus there is a line of work aiming to provide robustness certification for NNs.
+
+This project aims to provide to provide certified robustness for large-scale datasets against adversarial pertubations using various defenses proposed to robustify deep learning models particularly randomized smoothing. 
 
 ## Features
 
@@ -63,6 +65,6 @@ This project is licensed under the MIT License.
 ## Additional Sections
 
 - **Deployment**: Visit our deployment guide for instructions on how to deploy the application to various platforms.
-- **Documentation**: Access the full documentation [here](https://docs.myawesomeproject.com).
-- **Changelog**: View the changelog to see the history of changes between versions.
+<!-- - **Documentation**: Access the full documentation [here](https://docs.myawesomeproject.com). -->
+<!-- - **Changelog**: View the changelog to see the history of changes between versions. -->
 - **FAQ**: Check out our FAQ section for answers to common questions.
