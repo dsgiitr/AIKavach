@@ -31,6 +31,13 @@ To overcome the limitations of Neyman-Pearson-based certification, we have emplo
 ![Figure Demonstrating DSRS and NP approach](images_readme/overall_pipeline.png)
  More details can be found in [this](https://arxiv.org/abs/2206.07912) paper.
 
+Now the focus is on improving the computational efficiency of certified robustness in the context of randomized smoothing. While randomized smoothing has shown promising results in terms of robustness, the certification process can be computationally demanding, making it less practical for real-world applications.
+One of the main challenges lies in the estimation of confidence intervals, which heavily relies on large sample approximations. Existing methods typically use an input-agnostic sampling (IAS) scheme, where the sample size for the confidence interval is fixed regardless of the input. However, this approach may result in a suboptimal trade-off between the average certified radius (ACR) and runtime.
+
+To address this issue, we used an approach called Input-Specific Sampling (ISS) acceleration, which aims to achieve cost-effective robustness certification by adaptively reducing the sampling size based on the input characteristics. By doing so, the proposed method improves the efficiency of the certification process while still maintaining control over the decline in certified radius resulting from the reduced sample size.
+
+The experiments from [this](https://arxiv.org/abs/2112.12084) paper demonstrate that ISS can speed up the certification process by more than three times with a limited cost of reducing the certified radius by 0.05. Additionally, ISS outperforms the input-agnostic sampling (IAS) scheme in terms of the average certified radius across various hyperparameter settings.
+
 
 
 ## Installation
