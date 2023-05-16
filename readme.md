@@ -28,6 +28,9 @@ In the case of randomized smoothing (RS), the most widely used certification app
 
 To overcome the limitations of Neyman-Pearson-based certification, we have employed DSRS, which samples the prediction statistics of the base model under two different distributions and utilizes the joint information for certification computation. By incorporating more information, this certification approach surpasses the barrier posed by Neyman-Pearson-based certification and provides a tighter (if not equal) certification than the widely used approach.
 
+![Figure Demonstrating DSRS and NP approach](./images_readme/overall_pipeline.png)
+
+
 
 ## Installation
 
