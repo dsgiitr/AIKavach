@@ -5,7 +5,7 @@ My Awesome Project
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Features](#features)
+- [Overview_and_Ideas](#overview_and_ideas)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -17,12 +17,18 @@ Neural networks (NNs) have achieved great advances on a wide range of classifica
 
 This project aims to provide to provide certified robustness for large-scale datasets against adversarial pertubations using various defenses proposed to robustify deep learning models particularly randomized smoothing. 
 
-## Features
+## Overview_and_Ideas
 
-- Task management: Easily create, organize, and prioritize tasks.
-- Collaboration: Share tasks with teammates and collaborate in real-time.
-- Notifications: Get timely reminders and notifications for upcoming deadlines.
-- Reporting: Generate insightful reports and track progress.
+This project uses various techniques like DSRS (Double Sampling Randomized Smoothing), ISS (Input-Specific Sampling) and Denoised Smoothing to provide robust models and certified radius.
+
+Robustness certification aims to compute a robust radius for an input instance and model, which represents the maximum perturbation that can be applied without altering the final prediction. Certification approaches are typically conservative, providing a lower bound on the robust radius, while the actual maximum robust radius for a given input instance may be larger than the certified value. 
+
+Randomized smoothing has emerged as a popular technique to provide certified robustness for large-scale datasets. Concretely, it samples noise from a certain smoothing distribution to construct a smoothed classifier, and thus certifies the robust radius for the smoothed classifier. Compared to other techniques, randomized smoothing is efficient and agnostic to the model, and is applicable to a wide range of ML models.
+
+For RS, the most widely-used certification approach is called Neyman-Pearson-based certfication. It leverages the probability of base model's predicting each class under the input noise to compute the certification but this approach is not been able to scale to large datasets due to "Curse of Dimensionality".
+We have used DSRS which samples the base model's prediction statistics under two different distributions, and leverage the joint information to compute the certification. Since leveraging more information, this certification approach is able to circumvent the barrier of Neyman-Pearson-based certfication and provide 
+tighter (if not equal) certification than the most widely-used Neyman-Pearson-based approach.
+
 
 ## Installation
 
