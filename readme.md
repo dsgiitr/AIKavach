@@ -17,15 +17,16 @@ This project aims to provide to provide certified robustness for large-scale dat
 
 ## Overview_and_Ideas
 
-This project uses various techniques like DSRS (Double Sampling Randomized Smoothing), ISS (Input-Specific Sampling) and Denoised Smoothing to provide robust models and certified radius.
 
-Robustness certification aims to compute a robust radius for an input instance and model, which represents the maximum perturbation that can be applied without altering the final prediction. Certification approaches are typically conservative, providing a lower bound on the robust radius, while the actual maximum robust radius for a given input instance may be larger than the certified value. 
+This project incorporates various techniques such as DSRS (Double Sampling Randomized Smoothing), ISS (Input-Specific Sampling), and Denoised Smoothing to establish robust models and certified radii.
 
-Randomized smoothing has emerged as a popular technique to provide certified robustness for large-scale datasets. Concretely, it samples noise from a certain smoothing distribution to construct a smoothed classifier, and thus certifies the robust radius for the smoothed classifier. Compared to other techniques, randomized smoothing is efficient and agnostic to the model, and is applicable to a wide range of ML models.
+The goal of robustness certification is to determine a robust radius for a given input instance and model, which represents the maximum allowable perturbation without affecting the final prediction. Certification approaches tend to be conservative, offering a lower bound on the robust radius, while the actual maximum robust radius for a specific input instance may surpass the certified value.
 
-For RS, the most widely-used certification approach is called Neyman-Pearson-based certfication. It leverages the probability of base model's predicting each class under the input noise to compute the certification but this approach is not been able to scale to large datasets due to "Curse of Dimensionality".
-We have used DSRS which samples the base model's prediction statistics under two different distributions, and leverage the joint information to compute the certification. Since leveraging more information, this certification approach is able to circumvent the barrier of Neyman-Pearson-based certfication and provide 
-tighter (if not equal) certification than the most widely-used Neyman-Pearson-based approach.
+Randomized smoothing has gained popularity as a technique for providing certified robustness in large-scale datasets. It involves sampling noise from a smoothing distribution to construct a smoothed classifier, thereby certifying the robust radius for the smoothed classifier. Compared to other techniques, randomized smoothing is efficient, model-agnostic, and applicable to a wide range of machine learning models.
+
+In the case of randomized smoothing (RS), the most widely used certification approach is known as Neyman-Pearson-based certification. It relies on the probability of the base model predicting each class under the input noise to compute the certification. However, this approach encounters difficulties in scaling to large datasets due to the "Curse of Dimensionality."
+
+To overcome the limitations of Neyman-Pearson-based certification, we have employed DSRS, which samples the prediction statistics of the base model under two different distributions and utilizes the joint information for certification computation. By incorporating more information, this certification approach surpasses the barrier posed by Neyman-Pearson-based certification and provides a tighter (if not equal) certification than the widely used approach.
 
 
 ## Installation
