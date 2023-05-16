@@ -3,7 +3,8 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Overview_and_Ideas](#overview_and_ideas)
+- [Ideas](#ideas)
+- [File Structure](#file-structure)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -15,7 +16,7 @@ Neural networks (NNs) have achieved great advances on a wide range of classifica
 
 This project aims to provide to provide certified robustness for large-scale datasets against adversarial pertubations using various defenses proposed to robustify deep learning models particularly randomized smoothing. 
 
-## Overview_and_Ideas
+## Ideas
 
 
 This project incorporates various techniques such as DSRS (Double Sampling Randomized Smoothing), ISS (Input-Specific Sampling), and Denoised Smoothing to establish robust models and certified radii.
@@ -39,7 +40,9 @@ To overcome the limitations of Neyman-Pearson-based certification, we have emplo
  The experiments from [this](https://arxiv.org/abs/2112.12084) paper demonstrate that ISS can speed up the certification process by more than three times with a limited cost of reducing the certified radius by 0.05. Additionally, ISS outperforms the input-agnostic sampling (IAS) scheme in terms of the average certified radius across various hyperparameter settings.
 
 
-
+## File Structure
+ 
+ 
 ## Installation
 
 To use My Awesome Project, follow these steps:
