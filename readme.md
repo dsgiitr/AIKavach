@@ -12,9 +12,8 @@
 
 ## Introduction
 
-Neural networks (NNs) have achieved great advances on a wide range of classification tasks, but have been shown vulnerable against adversarial examples(adversarial pertubations) and thus there is a line of work aiming to provide robustness certification for NNs.
+Neural networks (NNs) have achieved great advances on a wide range of classification tasks.However, it is widely acknowledged that even subtle modifications to the inputs of image classification systems can lead to incorrect predictions.Take, for example, a model trained to classify images of an deer. The model easily classifies an image of the animal grazing in a grassy field. Now, if just a few pixels in that image are maliciously altered, you can get a very different—and wrong—prediction despite the image appearing unchanged to the human eye. Sensitivity to such input perturbations, which are known as adversarial examples, raises security and reliability issues for the vision-based systems that we deploy in the real world. To tackle this challenge,our project aims to provide to provide certified robustness for large-scale datasets against adversarial pertubations using various defenses proposed to robustify deep learning models particularly randomized smoothing. 
 
-This project aims to provide to provide certified robustness for large-scale datasets against adversarial pertubations using various defenses proposed to robustify deep learning models particularly randomized smoothing. 
 
  ## Ideas
 
