@@ -10,7 +10,7 @@ from random import random
 from multiprocessing.pool import Pool, ThreadPool
 from scipy.stats import norm
 from statsmodels.stats.proportion import proportion_confint
-from icecream import ic
+#from icecream import ic
 
 workers = 10
 ORIG_R_EPS = 5e-5
@@ -314,7 +314,7 @@ if __name__ == '__main__':
     label = secure_model.label_inference_without_certification(x, 1_000, 0.01, batch_size = 64)
     logits_old = secure_model.logits_inference_without_certification(x, 1000, 0.01, batch_size = 64)
     logits, r = secure_model.inference_and_certification(x, 100, 0.01, batch_size = 64)
-    ic(label)
-    ic(logits_old)
+    #ic(label)
+    #ic(logits_old)
     print(f"logits are: {logits}, radius is {r}")
     print('meow meow') 

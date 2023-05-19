@@ -4,7 +4,7 @@ import numpy as np
 from math import ceil
 from statsmodels.stats.proportion import proportion_confint
 from torchvision.transforms import RandomCrop
-from icecream import ic
+#from icecream import ic
 
 from distribution import Distribution
 
