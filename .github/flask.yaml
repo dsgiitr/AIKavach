@@ -15,9 +15,10 @@ jobs:
         python-version: '3.8'
 
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Start the Flask development server
       run: python app.py &
@@ -31,3 +32,7 @@ jobs:
         curl -X GET http://localhost:5000
         curl -X GET http://localhost:5000/form
         curl http://localhost:5000//download_weights/0
+    
+    - name: Run Tests for CPU model testing
+      run: |
+        pytest test.py

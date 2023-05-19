@@ -17,8 +17,9 @@ def sample_noise(model: torch.nn.Module, x: torch.tensor, dist: Distribution, nu
     :param batch_size:
     :return: an ndarray[int] of length num_classes containing the per-class counts
     """
-    model.to('cuda')
-    x = x.cuda()
+    model.to('cuda' if torch.cuda.is_available() else 'cpu')
+    if torch.cuda.is_available():
+        x = x.cuda()
     tot = num
     random_cropper = RandomCrop((x[0].shape[2], x[0].shape[3]))
     with torch.no_grad():
@@ -30,8 +31,8 @@ def sample_noise(model: torch.nn.Module, x: torch.tensor, dist: Distribution, nu
             this_batch_size = min(batch_size, num)
             num -= this_batch_size*num_crop
             batch = x.repeat((this_batch_size, 1, 1, 1))
-            noise = dist.sample(this_batch_size, cuda=True)
-            noise = torch.tensor(noise, device='cuda').resize_as(batch)
+            noise = dist.sample(this_batch_size, cuda=True  if torch.cuda.is_available() else False)
+            noise = torch.tensor(noise, device='cuda' if torch.cuda.is_available() else 'cpu').resize_as(batch)
             for j in range(num_crop):
                 predictions = model(random_cropper(batch) + noise).argmax(1)
                 counts += np.sum(torch.squeeze(predictions).item() == label)
@@ -46,8 +47,9 @@ def get_logits(model: torch.nn.Module, x: torch.tensor, dist: Distribution, num:
     :param batch_size:
     :return: an ndarray[int] of length num_classes containing the per-class counts
     """
-    model.to('cuda')
-    x = x.cuda()
+    model.to('cuda' if torch.cuda.is_available() else 'cpu')
+    if torch.cuda.is_available(): 
+        x = x.cuda()
     tot = num
     random_cropper = RandomCrop((x.shape[-2], x.shape[-1]))
     with torch.no_grad():
@@ -58,8 +60,8 @@ def get_logits(model: torch.nn.Module, x: torch.tensor, dist: Distribution, num:
             this_batch_size = min(batch_size, num)
             num -= this_batch_size*num_crop
             batch = x.repeat((this_batch_size, 1, 1, 1))
-            noise = dist.sample(this_batch_size, cuda=True)
-            noise = torch.tensor(noise, device='cuda').resize_as(batch)
+            noise = dist.sample(this_batch_size, cuda=True if torch.cuda.is_available() else False )
+            noise = torch.tensor(noise, device='cuda' if torch.cuda.is_available() else "cpu").resize_as(batch)
             for j in range(num_crop):
                 predictions = model(random_cropper(batch) + noise).argmax(1)
                 for idx in predictions:
@@ -165,7 +167,7 @@ class Smooth(object):
                 num -= this_batch_size
 
                 batch = x.repeat((this_batch_size, 1, 1, 1))
-                noise = torch.randn_like(batch, device='cuda') * self.sigma
+                noise = torch.randn_like(batch, device='cuda' if torch.cuda.is_available() else "cpu") * self.sigma
                 predictions = self.base_classifier(batch + noise).argmax(1)
                 counts += self._count_arr(predictions.cpu().numpy(), self.num_classes)
             return counts

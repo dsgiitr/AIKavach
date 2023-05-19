@@ -58,12 +58,19 @@ async def calculate_dsrs_radius(
         sigma_q = sigma_p - 0.2
     else:
         sigma_q = sigma_p / 2
-
-    secure_model = FinishedModel(denoised_model, d, k, num_classes, form_used["distribution"][0], form_used["distribution"][0], float(form_used['sigma'][0]),float(sigma_q), float(form_used['alpha'][0]), num_sampling_min = 100)
+    if form_used["distribution"][0] == "general_gaussian":
+        dist1 = "general-gaussian"
+        dist2 = "general-gaussian"
+    elif form_used["distribution"][0] == "standard_gaussian":
+        dist1 = "gaussian"
+        dist2 = "gaussian"
+    
+    denoised_model = torch.load(denoised_model, map_location=torch.device('cuda' if torch.cuda.is_available() else "cpu"))
+    secure_model = FinishedModel(denoised_model, d, k, num_classes, dist1,dist2, float(form_used['sigma'][0]),float(sigma_q), float(form_used['alpha'][0]), num_sampling_min = 100)
     x = torch.randn((28, 28)).float()
-    label = secure_model.label_inference_without_certification(x, int(form_used['N']), 0.01, batch_size = int(form_used['batch_size']))
-    logits_old = secure_model.logits_inference_without_certification(x, int(form_used['N']), 0.01, batch_size = int(form_used['batch_size']))
-    logits, r = secure_model.inference_and_certification(x,  int(form_used['N']), 0.01, batch_size = int(form_used['batch_size']))
+    label = secure_model.label_inference_without_certification(x, int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
+    logits_old = secure_model.logits_inference_without_certification(x, int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
+    logits, r = secure_model.inference_and_certification(x,  int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
     model_id = form_used["model_id"]
     final_path = f"/final_model_weights/final_model_{model_id}"
     torch.save(final_model,final_path)
@@ -127,7 +134,7 @@ def calculate_denoised_form():
         #     return jsonify({'error': error})
         #Execute the second Bash script
         
-        denoised_model = f""
+        denoised_model = f"models/{model_dict['file_name']}"
         if not os.path.exists("final_model_weights/"):
             os.makedirs("final_model_weights/")
         final_model_path = f"final_model_weights/final_model_weight_{model_id}.pth"

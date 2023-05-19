@@ -21,6 +21,7 @@ class FinishedModel():
         self.num_sampling_min = num_sampling_min
         self.denoised_model = denoised_model
         self.denoised_model.eval()
+        #TODO:
         # the line below is temporary until denoiser stuff is integrated
         self.num_dims = d
         self.alpha = alpha
