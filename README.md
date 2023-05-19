@@ -78,7 +78,7 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 
 .
 ├── LICENSE
-├── Makefile                   <- Makefile with commands like `make data` or `make train`
+├── Makefile                   <- Makefile with commands like  or `make train`
 ├── README.md                  <- The top-level README for developers using this project
 ├── readme_images              <- Directory for readme-related images
 ├── data
@@ -123,6 +123,7 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 │   └── utilities              <- Scripts for exploratory and results-oriented visualizations
 │       └── utils.py           <- Utility functions
 └── tox.ini                    <- tox file with settings for running tox
+
 
 
  - [data](aisec/data)
