@@ -5,8 +5,9 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, render_template, request, send_file, redirect
 import asyncio
 import time
-import packaging_class
+from packaging_class import *
 from datetime import datetime
+import torch
 
 app = Flask(__name__)
 
@@ -58,7 +59,7 @@ async def calculate_dsrs_radius(
     else:
         sigma_q = sigma_p / 2
 
-    secure_model = FinishedModel(denoised_model, d, k, num_classes, form_used["distribution"][0], form_used["distribution"][0], float(form_used['sigma'][0]),float(sigma_q), float(form_used['alpha']), num_sampling_min = 100)
+    secure_model = FinishedModel(denoised_model, d, k, num_classes, form_used["distribution"][0], form_used["distribution"][0], float(form_used['sigma'][0]),float(sigma_q), float(form_used['alpha'][0]), num_sampling_min = 100)
     x = torch.randn((28, 28)).float()
     label = secure_model.label_inference_without_certification(x, int(form_used['N']), 0.01, batch_size = int(form_used['batch_size']))
     logits_old = secure_model.logits_inference_without_certification(x, int(form_used['N']), 0.01, batch_size = int(form_used['batch_size']))
@@ -66,8 +67,7 @@ async def calculate_dsrs_radius(
     model_id = form_used["model_id"]
     final_path = f"/final_model_weights/final_model_{model_id}"
     torch.save(final_model,final_path)
-
-    return logits, r
+    return r
 
 models = [{
     "name":"test1",
@@ -117,22 +117,25 @@ def calculate_denoised_form():
     if request.method == 'POST':
         print(request.form.get("model_id"))
         model_id = int(request.form.get("model_id"))
-        # model_dict = models[model_id]
-        # denoised_model = f"/denoised/model_{model_id}.pth"
+        model_dict = models[model_id]
+        
+        # TODO: Add option to train denoisers
         # p1 = subprocess.Popen(['python', 'train.py','-e', '1', '-n', f'{denoised_model}'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # out1, err1 = p1.communicate()
         # if err1:
         #     error = 'An error occurred while executing the scripts'
         #     return jsonify({'error': error})
-        # #Execute the second Bash script
-        # if not os.path.exists("/final_model_weights/"):
-        #     os.makedirs("/final_model_weights/")
-        # final_model_path = f"/final_model_weights/final_model_weight_{model_id}.pth"
-        # logits, r = calculate_dsrs_radius(denoised_model, form_used)
+        #Execute the second Bash script
+        
+        denoised_model = f""
+        if not os.path.exists("final_model_weights/"):
+            os.makedirs("final_model_weights/")
+        final_model_path = f"final_model_weights/final_model_weight_{model_id}.pth"
          # Check for any errors
          # sample results 
-        
-        r=0.2
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        loop = asyncio.get_event_loop()
+        r = loop.run_until_complete(calculate_dsrs_radius(denoised_model, model_dict))
         results = [
             {"confidence Radius": r},
         ]
