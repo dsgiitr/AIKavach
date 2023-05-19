@@ -257,25 +257,20 @@ class FinishedModel():
         """""
         Expects x's dimensions to be in the order N, C, H, W
         """""
-        nA1_1, realN_1_1 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
-        nA2_1, realN_2_1 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_2, num = self.num_sampling_min // 2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
-        p1low_1, p1high_1 = smooth.confidence_bound(nA1_1[nA1_1.argmax().item()].item(), realN_1_1, self.alpha)
-        p2low_2, p2high_2 = smooth.confidence_bound(nA2_1[nA2_1.argmax().item()].item(), realN_2_1, self.alpha)
-        num_opt_1 = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha)
-        num_opt_2 = self.get_opt_num_sampling(p2low_2, p2high_2, num_sampling, fractional_loss, batch_size, self.std_2, self.alpha)
-        nA1_2, realN_1_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = num_opt_1, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
-        nA2_2, realN_2_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_2, num = num_opt_2, num_classes = self.num_classes, batch_size = batch_size, num_crop = 5)
-        nA_1 = nA1_1 + nA1_2
-        nA_2 = nA2_1 + nA2_2
-        nA = nA_1 + nA_2
+        nA_1_1, realN_1_1 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = self.num_sampling_min, num_classes = self.num_classes, batch_size = batch_size)
+        p1low_1, p1high_1 = smooth.confidence_bound(nA_1_1[nA_1_1.argmax().item()].item(), realN_1_1, self.alpha)
+        num_opt = self.get_opt_num_sampling(p1low_1, p1high_1, num_sampling, fractional_loss, batch_size, self.std_1, self.alpha)
+        nA_1_2, realN_1_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_1, num = num_opt*batch_size - self.num_sampling_min, num_classes = self.num_classes, batch_size = batch_size)
+        nA_1 = nA_1_1 + nA_1_2
         realN_1 = realN_1_1 + realN_1_2
-        realN_2 = realN_2_1 + realN_2_2
         p1low_1, p1high_1 = smooth.confidence_bound(nA_1[nA_1.argmax().item()].item(), realN_1, self.alpha)
-        p1low_2, p1high_2 = smooth.confidence_bound(nA_2[nA_1.argmax().item()].item(), realN_2, self.alpha)
-        now_r, now_time = self.orig_radius_pool_func(p1high_1, self.dist_1)
-        full_info = [0, now_r, p1low_1, p1high_1, [[p1low_2, p1high_2]]]
-        r = self.bunk_radius_calc(full_info, self.dist_name_2, self.num_dims, self.k, self.std_1, self.std_2, 'fast')
-        return F.softmax(torch.Tensor(nA)).detach().numpy(), r
+        nA_2, realN_2 = smooth.get_logits(model = self.denoised_model, x = x, dist = self.dist_2, num = num_opt*batch_size, num_classes = self.num_classes, batch_size = batch_size)
+        p2low_2, p2high_2 = smooth.confidence_bound(nA_2[nA_2.argmax().item()].item(), realN_2, self.alpha)
+        r1, now_time = self.orig_radius_pool_func(p1low_1, self.dist_1)
+        full_info = [0, r1, p1low_1, p1high_1, [[p2low_2, p2high_2]]]
+        r2 = self.bunk_radius_calc(full_info, self.dist_name_2, self.num_dims, self.k, self.std_1, self.std_2, 'precise')
+        nA = nA_1 + nA_2
+        return F.softmax(torch.Tensor(nA)).detach().numpy(), r2
 
 class ChotaModel(nn.Module):
     def __init__(self) -> None:
