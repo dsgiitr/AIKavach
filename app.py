@@ -65,8 +65,9 @@ async def calculate_dsrs_radius(
         dist1 = "gaussian"
         dist2 = "gaussian"
     
-    denoised_model = torch.load(denoised_model, map_location=torch.device('cuda' if torch.cuda.is_available() else "cpu"))
-    secure_model = FinishedModel(denoised_model, d, k, num_classes, dist1,dist2, float(form_used['sigma'][0]),float(sigma_q), float(form_used['alpha'][0]), num_sampling_min = 100)
+    classifier = torch.load(denoised_model, map_location=torch.device('cuda' if torch.cuda.is_available() else "cpu"))
+    print(classifier)
+    secure_model = FinishedModel(classifier, d, k, num_classes, dist1,dist2, float(form_used['sigma'][0]),float(sigma_q), float(form_used['alpha'][0]), num_sampling_min = 100)
     x = torch.randn((28, 28)).float()
     label = secure_model.label_inference_without_certification(x, int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
     logits_old = secure_model.logits_inference_without_certification(x, int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
