@@ -66,6 +66,7 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 
  ### A typical top-level directory layout
 
+ ```
  .
 ├── LICENSE
 ├── Makefile                     <- Makefile with commands like `make data` or `make train`
@@ -113,7 +114,7 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 │   └── utilities                <- Scripts for exploratory and results-oriented visualizations
 │       └── utils.py             <- Utility functions
 └── tox.ini                      <- tox file with settings for running tox
-
+```
 
 
  <!-- - [data](aisec/data)
