@@ -30,20 +30,38 @@ from data.dataset_fdncnn import DatasetFDnCNN as FDnCNNdata
 # github: https://github.com/cszn/KAIR
 '''
 
+ 
 class denoiser():
-    def __init__(self,json_path='options/train_drunet.json') -> None:
+    def __init__(self,json_path='options/train_drunet.json',in_nc=None, out_nc=None, nc=None, nb=None) -> None:
         parser = argparse.ArgumentParser()
         parser.add_argument('--opt', type=str, default=json_path, help='Path to option JSON file.')
         parser.add_argument('--launcher', default='pytorch', help='job launcher')
         parser.add_argument('--local_rank', type=int, default=0)
         parser.add_argument('--dist', default=False)
-        parser.add_argument('-d', default=0)
-        parser.add_argument('-e', type=int,default=False)
-        parser.add_argument('-m',  default=0)
-        parser.add_argument('-n')
+        parser.add_argument('--epochs', type=int,
+                            help="Number of epochs")
+
+        # Dataset
+        parser.add_argument('--dataset', type=str, help='path to dataset of choice')
+        parser.add_argument('--in_nc', type=int, help='input dimensions')
+        parser.add_argument('--out_nc', type=int, help='output dimensions')
+
+        # Model type
+        parser.add_argument('--model_name', type=str, help="name of model")
+        parser.add_argument('--model_path', type=str, help="path to model")
+
+        # Setting
+        parser.add_argument('--nc', type=list, help='input should look like "265340,268738,270774,270817" ')
+        parser.add_argument('--h', type=int, help='dimensions of hidden state')
+
         opt = option.parse(parser.parse_args().opt, is_train=True)
         opt['dist'] = parser.parse_args().dist
 
+        if in_nc is not None:
+            opt['netG']['in_nc'] = in_nc
+            opt['netG']['out_nc'] = out_nc
+            opt['netG']['nc'] = nc
+            opt['netG']['nb'] = nb
         # ----------------------------------------
         # distributed settings
         # ----------------------------------------
@@ -54,24 +72,24 @@ class denoiser():
         if opt['rank'] == 0:
             util.mkdirs((path for key, path in opt['path'].items() if 'pretrained' not in key))
 
-        # ----------------------------------------
-        # update opt
-        # ----------------------------------------
-        # -->-->-->-->-->-->-->-->-->-->-->-->-->-
-        init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G')
-        opt['path']['pretrained_netG'] = init_path_G
-        init_iter_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
-        opt['path']['pretrained_optimizerG'] = init_path_optimizerG
-        self.current_step = max(init_iter_G, init_iter_optimizerG)
+        # # ----------------------------------------
+        # # update opt
+        # # ----------------------------------------
+        # # -->-->-->-->-->-->-->-->-->-->-->-->-->-
+        # init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G')
+        # opt['path']['pretrained_netG'] = init_path_G
+        # init_iter_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
+        # opt['path']['pretrained_optimizerG'] = init_path_optimizerG
+        # self.current_step = max(init_iter_G, init_iter_optimizerG)
 
-        border = opt['scale']
-        # --<--<--<--<--<--<--<--<--<--<--<--<--<-
+        # border = opt['scale']
+        # # --<--<--<--<--<--<--<--<--<--<--<--<--<-
 
-        # ----------------------------------------
-        # save opt to  a '../option.json' file
-        # ----------------------------------------
-        if opt['rank'] == 0:
-            option.save(opt)
+        # # ----------------------------------------
+        # # save opt to  a '../option.json' file
+        # # ----------------------------------------
+        # if opt['rank'] == 0:
+        #     option.save(opt)
 
         # ----------------------------------------
         # return None for missing key
@@ -86,7 +104,7 @@ class denoiser():
     def ld(self,pth):
         self.drunet.load(pth)
 
-    def train_drunet(self,epochs=1000,pth=None):
+    def train_drunet(self,epochs=1000,pth=None,batch_size = 64, num_workers = 8):
 
         # Step--1 (prepare opt)
     
@@ -115,22 +133,22 @@ class denoiser():
         # ----------------------------------------
         if pth is not None:
             train_set = FDnCNNdata(dataroot_H=pth)
-            train_size = int(math.ceil(len(train_set) / dataset_opt['dataloader_batch_size']))
+            train_size = int(math.ceil(len(train_set) / batch_size))
             print(train_size)
             if self.opt['dist']:
-                train_sampler = DistributedSampler(train_set, shuffle=dataset_opt['dataloader_shuffle'], drop_last=True, seed=seed)
+                train_sampler = DistributedSampler(train_set, shuffle=True, drop_last=True, seed=seed)
                 train_loader = DataLoader(train_set,
-                                        batch_size=dataset_opt['dataloader_batch_size']//opt['num_gpu'],
+                                        batch_size=batch_size//opt['num_gpu'],
                                         shuffle=False,
-                                        num_workers=dataset_opt['dataloader_num_workers']//opt['num_gpu'],
+                                        num_workers=num_workers//opt['num_gpu'],
                                         drop_last=True,
                                         pin_memory=True,
                                         sampler=train_sampler)
             else:
                 train_loader = DataLoader(train_set,
-                                        batch_size=dataset_opt['dataloader_batch_size'],
-                                        shuffle=dataset_opt['dataloader_shuffle'],
-                                        num_workers=dataset_opt['dataloader_num_workers'],
+                                        batch_size=batch_size,
+                                        shuffle=True,
+                                        num_workers=num_workers,
                                         drop_last=True,
                                         pin_memory=True)
 
