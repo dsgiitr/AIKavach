@@ -76,72 +76,54 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
     └── README.md
 
 
+.
 ├── LICENSE
-├── Makefile           <- Makefile with commands like `make data` or `make train`
-├── README          
-│   ├── README.md       <- The top-level README for developers using this project.
-│   └── readme_images
-|
+├── Makefile                   <- Makefile with commands like `make data` or `make train`
+├── README.md                  <- The top-level README for developers using this project
+├── readme_images              <- Directory for readme-related images
 ├── data
-│   ├── external       <- Data from third party sources.
-│   ├── interim        <- Intermediate data that has been transformed.
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- The original, immutable data dump.
-│
-├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-│
-├── models             <- Trained and serialized models, model predictions, or model summaries
-│
-├── denoiser 
-│   ├── data        <- Intermediate data that has been transformed.
-│   ├── train_denoiser.py        <- Intermediate data that has been transformed.
-│   ├── denoising, drunet      <- The final, canonical data sets for modeling.
-│   ├── utilities        <- Intermediate data that has been transformed.
-|   |    ├── extra        <- Intermediate data that has been transformed.
-│   |    └── utils_image.py            <- The original, immutable data dump.
-|   |
-|   ├── models        <- Contains model of denoiser
-|   |    ├── model_base.py        <- Intermediate data that has been transformed.
-|   |    ├── model_plain.py        <- Intermediate data that has been transformed.
-|   |    ├── network_unet.py        <- Intermediate data that has been transformed.
-│   |    └── select_network.py            <- The original, immutable data dump.
-|   |
-│   ├── options     <- Default JSON file for training.
-│   └── trainsets/trainH   <- Contains high quality training image 
-|       
-│      
-├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-│
-├── web            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   ├── app.py    <- Makes src a Python module
-│   └── flask_try.py        <- Generated graphics and figures to be used in reporting
-│
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-├── setup.py           <- Make this project pip installable with `pip install -e`
-├── src                <- Source code for use in this project.
-<!-- │   ├── __init__.py    <- Makes src a Python module -->
-│   ├── main.py    <- Makes src a Python module
-│   ├── main.sh    <- Makes src a Python module
-│   │
-│   ├── data           <- Scripts to download or generate data
-│   │   └── make_dataset.py
-│   │
-│   ├── features       <- Scripts to turn raw data into features for modeling
-│   |   ├── algo.py        <- Intermediate data that has been transformed.
-│   |   ├── distribution.py        <- Intermediate data that has been transformed.
-│   │   └── smooth.py
-|   |
-│   ├── models         <- Scripts to train models and then use trained models to make
-│   │   │                 predictions
-│   │   ├── train.py
-│   │   └── sample.py
-│   │
-│   └── utilities  <- Scripts to create exploratory and results oriented visualizations
-│       └── utils.py
-│
-└── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+│   ├── external               <- Data from third party sources
+│   ├── interim                <- Intermediate data that has been transformed
+│   ├── processed              <- The final, canonical data sets for modeling
+│   └── raw                    <- The original, immutable data dump
+├── docs                       <- A default Sphinx project; see sphinx-doc.org for details
+├── models                     <- Trained and serialized models, model predictions, or model summaries
+├── denoiser
+│   ├── data                   <- Intermediate data that has been transformed
+│   ├── train_denoiser.py      <- Python script for training the denoiser
+│   ├── denoising
+│   │   └── drunet             <- The final, canonical data sets for modeling
+│   ├── utilities              <- Utility scripts for the denoiser
+│   │   ├── extra              <- Extra utilities
+│   │   └── utils_image.py     <- Utility functions for image processing
+│   ├── models                 <- Contains models of the denoiser
+│   │   ├── model_base.py      <- Base model class
+│   │   ├── model_plain.py     <- Plain model class
+│   │   ├── network_unet.py    <- U-Net network architecture
+│   │   └── select_network.py  <- Script for selecting the network
+│   └── options                <- Default JSON file for training
+│── references                 <- Data dictionaries, manuals, and all other explanatory materials
+├── web                        <- Generated analysis as HTML, PDF, LaTeX, etc.
+│   ├── app.py                 <- Python script for the web application
+│   └── flask_try.py           <- Generated graphics and figures to be used in reporting
+├── requirements.txt           <- The requirements file for reproducing the analysis environment
+├── setup.py                   <- Make this project pip installable with `pip install -e`
+├── src                        <- Source code for use in this project
+│   ├── main.py                <- Python module
+│   ├── main.sh                <- Shell script
+│   ├── data                   <- Scripts to download or generate data
+│   │   └── make_dataset.py    <- Script to make dataset
+│   ├── features               <- Scripts to turn raw data into features for modeling
+│   │   ├── algo.py            <- Intermediate data that has been transformed
+│   │   ├── distribution.py    <- Intermediate data that has been transformed
+│   │   └── smooth.py          <- Script for smoothing data
+│   ├── models                 <- Scripts to train models and make predictions
+│   │   ├── train.py           <- Script for model training
+│   │   └── sample.py          <- Script for model prediction sampling
+│   └── utilities              <- Scripts for exploratory and results-oriented visualizations
+│       └── utils.py           <- Utility functions
+└── tox.ini                    <- tox file with settings for running tox
+
 
  - [data](aisec/data)
       - [dataset_fdcnn.py](aisec/data/dataset_fdncnn.py)
