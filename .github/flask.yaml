@@ -1,4 +1,4 @@
-name: Test API
+name: Test Flask App
 
 on: [push]
 
@@ -26,6 +26,8 @@ jobs:
       run: |
         sleep 10
 
-    - name: Test API
+    - name: Test APIs
       run: |
-        curl -X GET http://localhost:5000/get_results
+        curl -X GET http://localhost:5000
+        curl -X GET http://localhost:5000/form
+        curl http://localhost:5000//download_weights/0
