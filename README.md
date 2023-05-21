@@ -5,6 +5,7 @@
 - [Introduction](#introduction)
 - [Motivation](#motivation)
  - [File Structure](#file-structure)
+- [File Description](#file-description)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -30,7 +31,7 @@ To overcome the limitations of Neyman-Pearson-based certification, we have emplo
 
 ![Figure Demonstrating DSRS and NP approach](readme_images/overall_pipeline.png)
 
-This image is taken from [this](https://arxiv.org/abs/2206.07912) paper.
+Image demonstrating differences between N-P and DSRS approach taken from [this](https://arxiv.org/abs/2206.07912) paper.
 
 
 Here,
@@ -50,7 +51,7 @@ In practice, it is hard to calculate P<sub>A</sub> and Q<sub>A</sub>, so it’s 
 
 
 ![DRUNET Architecture](readme_images/denoiser_arch.png)
-This image is taken from [paper](https://arxiv.org/pdf/2008.13751.pdf).
+Image showing architecture of **DRUNET** taken from  [paper](https://arxiv.org/pdf/2008.13751.pdf).
 
 DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 
@@ -120,6 +121,8 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 
 ```                 
 
+
+## File Description
 
 
 ## Installation
