@@ -70,16 +70,9 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
  ```
  .
 ├── LICENSE
-├── Makefile                     <- Makefile with commands like `make data` or `make train`
 ├── README.md                    <- The top-level README for developers using this project
 ├── readme_images                <- Directory for readme-related images
-├── data
-│   ├── external                 <- Data from third party sources
-│   ├── interim                  <- Intermediate data that has been transformed
-│   ├── processed                <- The final, canonical data sets for modeling
-│   └── raw                      <- The original, immutable data dump
 ├── docs                         <- A default Sphinx project; see sphinx-doc.org for details
-├── models                       <- Trained and serialized models, model predictions, or model summaries
 ├── denoiser
 │   ├── data                     <- Intermediate data that has been transformed
 │   ├── train_denoiser.py        <- Python script for training the denoiser
@@ -106,7 +99,7 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 │   ├── data                     <- Scripts to download or generate data
 │   │   └── make_dataset.py      <- Script to make dataset
 │   ├── features                 <- Scripts to turn raw data into features for modeling
-│   │   ├── algo.py              <- Intermediate data that has been transformed
+│   │   ├── - [algo.py](algo.py)              <- Intermediate data that has been transformed
 │   │   ├── distribution.py      <- Intermediate data that has been transformed
 │   │   └── smooth.py            <- Script for smoothing data
 │   ├── models                   <- Scripts to train models and make predictions
