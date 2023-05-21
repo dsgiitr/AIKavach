@@ -67,48 +67,49 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 
  ### A typical top-level directory layout
 
+```
 .
 ├── LICENSE
-├── Makefile                     <- Makefile with commands like `make train`
 ├── README.md                    <- The top-level README for developers using this project
 ├── readme_images                <- Directory for readme-related images
-├── data
-│   ├── [external](data/external) <- Data from third party sources
-│   ├── [interim](data/interim)   <- Intermediate data that has been transformed
-│   ├── [processed](data/processed) <- The final, canonical data sets for modeling
-│   └── [raw](data/raw)           <- The original, immutable data dump
-├── docs                         <- A default Sphinx project; see [sphinx-doc.org](https://www.sphinx-doc.org/) for details
-├── models                       <- Trained and serialized models, model predictions, or model summaries
+├── docs                         <- A default Sphinx project; see sphinx-doc.org for details
 ├── denoiser
 │   ├── data                     <- Intermediate data that has been transformed
-│   ├── [train_denoiser.py](denoiser/train_denoiser.py) <- Python script for training the denoiser
+│   ├── train_denoiser.py        <- Python script for training the denoiser
 │   ├── denoising
 │   │   └── drunet               <- The final, canonical data sets for modeling
 │   ├── utilities                <- Utility scripts for the denoiser
 │   │   ├── extra                <- Extra utilities
-│   │   └── [utils_image.py](denoiser/utilities/utils_image.py)  <- Utility functions for image processing
+│   │   └── utils_image.py       <- Utility functions for image processing
 │   ├── models                   <- Contains models of the denoiser
-│   │   ├── [model_base.py](denoiser/models/model_base.py)     <- Base model class
-│   │   ├── [model_plain.py](denoiser/models/model_plain.py)   <- Plain model class
-│   │   ├── [network_unet.py](denoiser/models/network_unet.py) <- U-Net network architecture
-│   │   └── [select_network.py](denoiser/models/select_network.py)  <- Script for selecting the network
+│   │   ├── model_base.py        <- Base model class
+│   │   ├── model_plain.py       <- Plain model class
+│   │   ├── network_unet.py      <- U-Net network architecture
+│   │   └── select_network.py    <- Script for selecting the network
 │   └── options                  <- Default JSON file for training
 ├── references                   <- Data dictionaries, manuals, and all other explanatory materials
 ├── web                          <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   ├── [app.py](web/app.py)     <- Python script for the web application
-│   └── [flask_try.py](web/flask_try.py)   <- Generated graphics and figures to be used in reporting
+│   ├── app.py                   <- Python script for the web application
+│   └── flask_try.py             <- Generated graphics and figures to be used in reporting
 ├── requirements.txt             <- The requirements file for reproducing the analysis environment
 ├── setup.py                     <- Make this project pip installable with `pip install -e`
 ├── src                          <- Source code for use in this project
-│   ├── [main.py](src/main.py)   <- Python module
-│   ├── [main.sh](src/main.sh)   <- Shell script
+│   ├── main.py                  <- Python module
+│   ├── main.sh                  <- Shell script
 │   ├── data                     <- Scripts to download or generate data
-│   │   └── [make_dataset.py](src/data/make_dataset.py)   <- Script to make dataset
+│   │   └── make_dataset.py      <- Script to make dataset
 │   ├── features                 <- Scripts to turn raw data into features for modeling
-│   │   ├── [algo.py](src/features/algo.py)             <- Intermediate data that has been transformed
-│   │   ├── [distribution.py](src/features/distribution.py) <- Intermediate data that has been transformed
-│   │   └── [smooth.py](src/features/smooth.py)         <- Script for smoothing data
-│   ├── models                   <- Scripts to train models and make
+│   │   ├── algo.py              <- Intermediate data that has been transformed
+│   │   ├── distribution.py      <- Intermediate data that has been transformed
+│   │   └── smooth.py            <- Script for smoothing data
+│   ├── models                   <- Scripts to train models and make predictions
+│   │   ├── train.py             <- Script for model training
+│   │   └── sample.py            <- Script for model prediction sampling
+│   └── utilities                <- Scripts for exploratory and results-oriented visualizations
+│       └── utils.py             <- Utility functions
+└── tox.ini                      <- tox file with settings for running tox
+
+```                 
 
 
 
