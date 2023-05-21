@@ -67,8 +67,8 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 
  ### A typical top-level directory layout
 
-
- .
+```
+.
 ├── LICENSE
 ├── README.md                    <- The top-level README for developers using this project
 ├── readme_images                <- Directory for readme-related images
