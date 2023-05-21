@@ -30,7 +30,7 @@ To overcome the limitations of Neyman-Pearson-based certification, we have emplo
 
 ![Figure Demonstrating DSRS and NP approach](readme_images/overall_pipeline.png)
 
-                                    (This image is taken from [this](https://arxiv.org/abs/2206.07912) paper.)
+This image is taken from [this](https://arxiv.org/abs/2206.07912) paper.
 
 
 Here,
@@ -45,14 +45,12 @@ Q_A = f^{Q}(x_0)_{y_0} = \mathbf{Pr}_{{\varepsilon }\sim Q}\, [F(x_0+\varepsilon
 
  More details can be found in [this](https://arxiv.org/abs/2206.07912) paper.
 
- <!-- Now,can we generate a provably robust classifier from off-the-shelf pretrained classifiers without retraining them specifically for robustness? No, hence we use denoised smoothing. Via the simple addition of a pretrained denoiser, we can apply randomized smoothing to make existing pretrained classifiers provably robust against adversarial examples without custom training. -->
-
 In practice, it is hard to calculate P<sub>A</sub> and Q<sub>A</sub>, so it’s estimated using Monte-Carlo sampling, which gives a confidence interval of P<sub>A</sub> and Q<sub>A</sub>.For a base classifier ___F___
 , one can apply the above procedure to get a prediction of any data point along with a robustness guarantee in the form of a certified radius, the radius around a given input for which the prediction is guaranteed to be fixed. But the above procedure assumes that the base classifier  ___F___ classifies well under Gaussian perturbations of its inputs. Now what if the base classifier  ___F___ is some off-the-shelf classifier that wasn’t trained specifically for randomized smoothing—that is, it doesn’t classify well under noisy perturbations of its inputs. With denoised smoothing, we make randomized smoothing effective for classifiers that aren’t trained specifically for randomized smoothing. The method is straightforward; as mentioned above, instead of applying randomized smoothing to these classifiers, we prepend a custom-trained denoiser in front of these classifiers and then apply randomized smoothing. The denoiser helps by removing noise from the noisy synthetic copies of the input, which allows the pre-trained classifiers to give better predictions. In this project, we used **DRUNET** as a denoiser for denoised smoothing.
 
 
 ![DRUNET Architecture](readme_images/denoiser_arch.png)
-                                 (This image is taken from [paper](https://arxiv.org/pdf/2008.13751.pdf).)
+This image is taken from [paper](https://arxiv.org/pdf/2008.13751.pdf).
 
 DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 
