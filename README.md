@@ -99,7 +99,7 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 │   ├── data                     <- Scripts to download or generate data
 │   │   └── make_dataset.py      <- Script to make dataset
 │   ├── features                 <- Scripts to turn raw data into features for modeling
-│   │   ├── [algo.py](algo.py)              <- Intermediate data that has been transformed
+│   │   ├── [algo.py](./algo.py)              <- Intermediate data that has been transformed
 │   │   ├── distribution.py      <- Intermediate data that has been transformed
 │   │   └── smooth.py            <- Script for smoothing data
 │   ├── models                   <- Scripts to train models and make predictions
