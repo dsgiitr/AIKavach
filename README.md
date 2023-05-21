@@ -30,6 +30,9 @@ To overcome the limitations of Neyman-Pearson-based certification, we have emplo
 
 ![Figure Demonstrating DSRS and NP approach](readme_images/overall_pipeline.png)
 
+                                    (This image is taken from [this](https://arxiv.org/abs/2206.07912) paper.)
+
+
 Here,
 
 ![Figure Demonstrating DSRS and NP approach](readme_images/equation.png)
@@ -49,6 +52,7 @@ In practice, it is hard to calculate P<sub>A</sub> and Q<sub>A</sub>, so it’s 
 
 
 ![DRUNET Architecture](readme_images/denoiser_arch.png)
+                                 (This image is taken from [paper](https://arxiv.org/pdf/2008.13751.pdf).)
 
 DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 
@@ -73,6 +77,7 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 ├── README.md                    <- The top-level README for developers using this project
 ├── readme_images                <- Directory for readme-related images
 ├── docs                         <- A default Sphinx project; see sphinx-doc.org for details
+│
 ├── denoiser
 │   ├── data                     <- Intermediate data that has been transformed
 │   ├── train_denoiser.py        <- Python script for training the denoiser
@@ -87,12 +92,17 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 │   │   ├── network_unet.py      <- U-Net network architecture
 │   │   └── select_network.py    <- Script for selecting the network
 │   └── options                  <- Default JSON file for training
+│
 ├── references                   <- Data dictionaries, manuals, and all other explanatory materials
+│
 ├── web                          <- Generated analysis as HTML, PDF, LaTeX, etc.
 │   ├── app.py                   <- Python script for the web application
 │   └── flask_try.py             <- Generated graphics and figures to be used in reporting
+│
 ├── requirements.txt             <- The requirements file for reproducing the analysis environment
+│
 ├── setup.py                     <- Make this project pip installable with `pip install -e`
+│
 ├── src                          <- Source code for use in this project
 │   ├── main.py                  <- Python module
 │   ├── main.sh                  <- Shell script
@@ -107,7 +117,8 @@ DruNet Architecture [paper](https://arxiv.org/pdf/2008.13751.pdf)
 │   │   └── sample.py            <- Script for model prediction sampling
 │   └── utilities                <- Scripts for exploratory and results-oriented visualizations
 │       └── utils.py             <- Utility functions
-└── tox.ini                      <- tox file with settings for running tox
+│
+└── test                         <- python test files
 
 ```                 
 
@@ -127,79 +138,22 @@ To use this Project, follow these steps:
 
 ##### Preparation
 
-1. Install recommended environment: python 3.9.7, scikit-learn >= 0.24, torch 1.10 with GPU (for fast sampling of DNN models).
 
-2. If you need to reproduce the results from certifying pretrained models (see *Guidelines for Reproducing Experimental Results > Scenario B*), download the trained models from Figshare (https://figshare.com/articles/software/Pretrained_Models_for_DSRS/21313548), and unzip to `models/` folder. After unzip, the `models` folder should contain 5 subfolder: `models/cifar10` (smoothadv's pretrained best CIFAR-10 models), `models/consistency` (reproduced consistency models), `models/new_cohen` (reproduced Cohen's Gaussian augmentation models), `models/salman` (reproduced Salman et al's models), and `models/smoothmix` (reproduced SmoothMix models).
 
-##### Running Certification from Scratch
 
-The main entrance of our code is `main.py`, which computes both the Neyman-Pearson-based certification and DSRS certification given the sampled probability folder path.
-
-Given a input test dataset and a model, to compute the DSRS certification, we need the following **three steps**:
 
 1. **Sampling & get the probability (P_A and Q_A) under two distributions**
 
-`sampler.py` loads the model and does model inference via PyTorch APIs. It will output pA or qA to corresponding txt file in `data/sampling/{model_filename.pth (.tar extension name is trimmed)}/` folder (will create the folder). Note that each run only samples pA from one distribution, so:
-
-- If the end-goal is to compute only the Neyman-Pearson-based certification, we only need one probability (P_A), and thus we run sampler.py just once for the model.
-
-- If the end-goal is to compute the DSRS certification, we need two probabilties from two different distributions (P_A and Q_A), and thus we run sampler.py twice for the model.
-
-Main usage:
-
-`python sampler.py [dataset: mnist/cifar10/imagenet/tinyiamgenet] [model: models/*/*.pth.tar] [sigma] --disttype [gaussian/general-gaussian] {--k [k]} {--th [number between 0 and 1 or "x+" for adaptive thresholding]} --N [sampling number, usually 50000 for DSRS, 100000 for Neyman-Pearson] --alpha [confidence, usually 0.0005 for DSRS, 0.001 for Neyman-Pearson]`
-
-
-There are other options such as batch size, data output directory, GPU no. specification, etc. Please browse `parser.add_arguments()` statements to get familier with them.
-
-- If the distribution is Gaussian, we don't need to specify $k$.
-- If the distribution is generalized Gaussian, we need to specify $k$, whose meaning can be found in the paper.
-- If the distribution is Gaussian or generalized Gaussian with thresholding, `--th` specifies the threshold. 
-  - If the threshold is a static value, `th` is a real number meaning the percentile. 
-  - If the threshold is depended by pA, `th` is "x+" (there are other heuristics but they do not work well), and the script will search the pA file to determine the threshold dynamically.
     
 
 2. **Compute the Neyman-Pearson-based certification**
 
-`main.py` is the entrance for computing both the Neyman-Pearson-based certification and the DSRS certification. Note compute the DSRS certification, one first needs to execute this step, i.e., compute the Neyman-Pearson-based certification, since DSRS tries to increase the radius certified strating from the certified radius of Neyman-Pearson-based certification.
-
-`main.py` is built solely on CPU, mainly relying on scikit-learn package.
-
-Main usage:
-
-`python main.py [dataset: mnist/cifar10/imagenet/tinyimagenet] origin [model: *.pth - will read from data/sampling/model, just type in "*.pth" as the name without relative path] [disttype = gaussian/general-gaussian] [sigma] [N: sampling number, used to index the sampling txt file] [alpha: confidence, used to index the sampling file] {--k [k]}`
-
-There are other options that can customized the folder path of sampling data or the parallelized CPU processes. But the default one is already good. Note that some arguments in `main.py` only have effects when computing DSRS certification, such as `-b`, `--improve_*`, `--new_rad_dir`.
-
-If the distribution type is generalized Gaussian, we need to specify k, otherwise not.
-
-For standard Gaussian, we use the closed-form expression in Cohen et al to compute the certification. 
-For generalized Gaussian, we use the numerical integration method in Yang et al to compute the certification.
 
 3. **Compute the DSRS certification**
 
-Once the Neyman-Pearson-based certification is computed, we run `main.py` again but use different arguments to compute the DSRS certification. 
-
-Main usage:
-
-`python main.py [dataset: mnist/cifar10/imagenet/tinyimagenet] improved [model: *.pth - will read from data/sampling/model, just type in "*.pth" as the name without relative path] [disttype = gaussian/general-gaussian/gaussian-th/general-gaussian-th] [sigma] [N: sampling number, used to index the sampling txt file] [alpha: confidence, used to index the sampling file] {--k [k]} {-b b1 b2 ...} {--improve_mode grid/fast/precise} {--improve_unit real_number} {--improve_eps real_number}`
-
-Note that the arguments are different from step 2, where `origin` changed to `improved`. The script will read in the previous Neyman-Pearson-based certification files, and compute the improved certification.
-
-Distribution P's parameters are specified by `disttype` and `k`. Specifically, if `disttype` is `gaussian-th` or `general-gaussian-th`, the P distribution is Gaussian or generalized Gaussian respectively, and the Q distribution is thresholded Gaussian or thresholded generalized Gaussian respectively.
-
-Distribution Q is of the same `disttype` and has the same `k` as P. The difference is in variance (if `disttype` is `gaussian` or `general-gaussian`) or the threshold (if `disttype` is `gaussian-th` or `general-gaussian-th`). The variance or the threshold (real number if static percentile threshold, `x+` if dynamic heuristic based threshold) is specified by `b1`, `b2`, ..., where each `bi` stands for one option of Q distribution, i.e., the script supports computing the certification with one P and multiple different Q's in a single run.
-
-`--improve_*` arguments specify the way we try a new robust radius to certify. The most precise way is to conduct binary search as listed in Algorithm 2 in the paper, but for efficiency we can also use `grid` mode as `improve_mode` which iteratively enlarges the radius by `imrpove_unit` and tries to certify.
-
-As mentioned in Appendix E.3, among these three steps, the most time-consuming step is Step 1 on typical image classification datasets.
 
 ##### Result Summarization and Plotting
 
-We provide the script `dump_main_result.py` to summarize main experimental data in our paper.
-
-Usage: `python dump_main_result.py`
-It will create `result/` folder and dump all main tables and figures there. Some critical results are also printed in stdout.
 
 ##### Appendix: Training Scripts
 
