@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>DSRS and Denoised Models</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            background-color: #89CFF0;
+            margin-left: 75px;
+            font-family: Sans-serif;
+        }
+    
+        h1 {
+            font-size: 65px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function calculateCertifiedRadius(button, modelId) {
+                var card = button.closest('.card');
+                var aTag = document.createElement("i");
+                aTag.className += "fa fa-spinner fa-spin";
+                var parent = card.querySelector('#calculate_radius');
+                parent.appendChild(aTag);
+                $.ajax({
+                    type: 'POST',
+                    url: '/calculate_certified_radius',
+                    data: { "model_id": modelId },
+                    success: function (data) {
+                        // Display results in Bootstrap table
+                        card.querySelector("#results").innerHTML += ("Confidence Radius: "+data["confidence Radius"]);
+                        card.querySelector("#calculate_radius").disabled = true;
+                        location.reload(); // reload the page
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert("Error retrieving results: " + errorThrown);
+                    }
+                });
+            }
+            function downloadModel(modelId) {
+                    var link = document.createElement('a');
+                    link.href = '/download_weights/' + modelId;
+                    //link.download = 'model_' + modelId + '.pth';
+                    link.click();
+                }
+
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>DSRS and Denoised Models</h1>
+        <hr>
+        <form method="GET" action="/form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="model_file"><h3>Add New Model</h3> </label>
+            </div>
+            <button type="submit" class="btn btn-primary">ADD</button>
+        </form>
+        <hr>
+        {% for model in models %}
+        <div class="card" id="model-{{model.model_id}}">
+            <div class="card-header">
+                {{ model.name }}
+            </div>
+            <div class="card-body">
+                <p class="card-text">Submitted on: {{ model.timestamp.strftime('%A, %B %d, %Y %I:%M:%S %p') }}</p>
+                <p class="card-text">File name: {{ model.file_name }}</p>
+                <p class="card-text" id="results"></p>
+                {%if model.results_calculated %}
+                <p class="card-text" id="results">Confidence Radius: {{model.certified_radius}}</p>
+                <button type="button" class="btn btn-primary" onclick="downloadModel('{{model.model_id}}')"> <i class="fa fa-download"></i>  Download Smoothened Model Weights</button>
+                {%else%}
+                <button type="button" class="btn btn-primary" onclick="calculateCertifiedRadius(this, '{{ model.model_id }}')" id="calculate_radius">
+                   Certified Radius
+                </button>
+                {%endif%}
+                <br>
+            </div>
+        </div>
+        <br>
+        {% endfor %}
+    </div>
+</body>
+
+</html>
