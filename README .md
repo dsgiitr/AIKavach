@@ -40,11 +40,6 @@ Here,
 ![Figure Demonstrating DSRS and NP approach](readme_images/equation.png)
 
 
-<!-- ```math
-P_A = f^{P}(x_0)_{y_0} = \mathbf{Pr}_{{\varepsilon }\sim P}\, [F(x_0+\varepsilon )=y_0]\\
-Q_A = f^{Q}(x_0)_{y_0} = \mathbf{Pr}_{{\varepsilon }\sim Q}\, [F(x_0+\varepsilon )=y_0]  -->
-
-
  More details can be found in [this](https://arxiv.org/abs/2206.07912) paper.
 
 In practice, it is hard to calculate P<sub>A</sub> and Q<sub>A</sub>, so it’s estimated using Monte-Carlo sampling, which gives a confidence interval of P<sub>A</sub> and Q<sub>A</sub>.For a base classifier ___F___
@@ -142,7 +137,7 @@ On setting up the website locally, you can access its features by following thes
 
 1. Begin by visiting the landing page and locate the "Add" button. By clicking on this button, you will be directed to a form.
 
-![Landing Page Img](readme_images/landing_page_img.jpeg)
+![Landing Page Img](readme_images/landing_page_image.jpeg)
 
 2. In the form, you will need to provide various inputs, including your model file, distribution, dataset type, and fix the values of sigma, alpha, and batch size.
 
@@ -173,7 +168,7 @@ On setting up the website locally, you can access its features by following thes
 3. **Compute the DSRS certification**
 
 
-##### Result Summarization and Plotting
+
 
 
 ##### Appendix: Training Scripts
@@ -223,6 +218,5 @@ This project is licensed under the MIT License.
 ## Additional Sections
 
 - **Deployment**: Visit our deployment guide for instructions on how to deploy the application to various platforms.
-<!-- - **Documentation**: Access the full documentation [here](https://docs.myawesomeproject.com). -->
-<!-- - **Changelog**: View the changelog to see the history of changes between versions. -->
-- **FAQ**: Check out our FAQ section for answers to common questions.
+
+ - **FAQ**: Check out our FAQ section for answers to common questions.
