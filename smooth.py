@@ -28,20 +28,19 @@ def sample_noise(model: torch.nn.Module, x: torch.tensor, dist: Distribution, nu
             if num <= 0:
                 break
             this_batch_size = min(batch_size, num)
-            num -= this_batch_size*num_crops
+            num -= this_batch_size*num_crop
             batch = x.repeat((this_batch_size, 1, 1, 1))
             noise = dist.sample(this_batch_size, cuda=True)
             noise = torch.tensor(noise, device='cuda').resize_as(batch)
             for j in range(num_crop):
                 predictions = model(random_cropper(batch) + noise).argmax(1)
                 counts += np.sum(torch.squeeze(predictions).item() == label)
-            if counts <= 1000 and tot - num >= 4000:
-                break
+            # if counts <= 1000 and tot - num >= 4000:
+            #     break
     return counts, tot - num
 
-def get_logits(model: torch.nn.Module, x: torch.tensor, dist: Distribution, num: int, num_classes: int, batch_size: int, num_crop: int):
+def get_logits(model: torch.nn.Module, x: torch.tensor, dist: Distribution, num: int, num_classes: int, batch_size: int, num_crop: int = 5):
     """ Sample the base classifier's prediction under noisy corruptions of the input x.
-
     :param x: the input [channel x width x height]
     :param num: number of samples to collect
     :param batch_size:
