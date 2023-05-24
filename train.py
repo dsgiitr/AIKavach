@@ -35,3 +35,8 @@ if args.model_path:
     de.ld(args.model_path)
 de.train_drunet(args.epochs,args.dataset)
 de.drunet.save(args.model_name)
+# <<<<<<< dev
+# de.drunet.save(args.model_name)
+# =======
+# de.drunet.save(args.model_name)
+# >>>>>>> main
