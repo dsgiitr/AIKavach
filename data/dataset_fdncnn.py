@@ -4,7 +4,7 @@ import torch
 import cv2
 import torch.utils.data as data
 import utils_image as util
-
+from torchvision import transforms
 
 class DatasetFDnCNN(data.Dataset):
     """
@@ -36,6 +36,7 @@ class DatasetFDnCNN(data.Dataset):
         # -------------------------------------
         # get H image
         # -------------------------------------
+        transform = transforms.Resize((32,32))
         H_path = self.paths_H[index]
         img_H = util.imread_uint(H_path, self.n_channels)
         # cv2.imshow(img_H)
@@ -68,6 +69,7 @@ class DatasetFDnCNN(data.Dataset):
             # HWC to CHW, numpy(uint) to tensor
             # ---------------------------------
             img_H = util.uint2tensor3(patch_H)
+            img_H = transform(img_H)
             img_L = img_H.clone()
 
             # ---------------------------------
@@ -91,6 +93,7 @@ class DatasetFDnCNN(data.Dataset):
             # --------------------------------
             """
             img_H = util.uint2single(img_H)
+            img_H = transforms(img_H)
             img_L = np.copy(img_H)
             np.random.seed(seed=0)
             img_L += np.random.normal(0, self.sigma_test/255.0, img_L.shape)

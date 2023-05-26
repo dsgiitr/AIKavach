@@ -73,8 +73,8 @@ async def calculate_dsrs_radius(
     logits_old = secure_model.logits_inference_without_certification(x, int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
     logits, r = secure_model.inference_and_certification(x,  int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
     model_id = form_used["model_id"]
-    final_path = f"/final_model_weights/final_model_{model_id}"
-    torch.save(final_model,final_path)
+    final_path = f"final_model_weights/final_model_{model_id}"
+    torch.save(secure_model,final_path)
     return r
 
 models = [{
@@ -128,7 +128,7 @@ def calculate_denoised_form():
         model_dict = models[model_id]
         
         # TODO: Add option to train denoisers
-        # p1 = subprocess.Popen(['python', 'train.py','-e', '1', '-n', f'{denoised_model}'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # p1 = subprocess.Popen(['python', 'train.py','--epochs', '1', '--in_nc','2','--out_nc','1','--model_name',f'{model_id}','--dataset','mnist/testSample'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # out1, err1 = p1.communicate()
         # if err1:
         #     error = 'An error occurred while executing the scripts'

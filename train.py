@@ -21,16 +21,10 @@ parser.add_argument('--model_name', type=str, help="name of model")
 parser.add_argument('--model_path', type=str, help="path to model")
 
 # Setting
-parser.add_argument('--nc', type=str, help='number of channels (input array, example input format: "265340,268738,270774,270817") ')
-parser.add_argument('--h', type=int, help='dimensions of hidden state')
 
 args = parser.parse_args()
 
-print(args.nc)
-
-a = [int(x) for x in args.nc.split()]
-
-de=denoiser(in_nc = args.in_nc,out_nc=args.out_nc,nc = a, nb=args.h)
+de=denoiser(in_nc = args.in_nc,out_nc=args.out_nc,nc = [64,128,256,512], nb=4)
 if args.model_path:
     de.ld(args.model_path)
 de.train_drunet(args.epochs,args.dataset)
