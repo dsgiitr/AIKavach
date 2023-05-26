@@ -8,19 +8,26 @@ import time
 from packaging_class import *
 from datetime import datetime
 import torch
+from train_denoiser import denoiser
+from integrate_dsrs_denoiser import DenoisedModel
+import utils_image as util
+import numpy as np
 
 app = Flask(__name__)
 
 async def calculate_dsrs_radius(
-  denoised_model, 
+  denoised_model,
+  de, 
   form_used: dict,
   sigma= 0.5,
   Distributon_type="general-gaussian",
   training = "mnist",
   k =380,
   N=100000,
+  in_nc = 3,
   Alpha = 0.05,
   batch = 400,
+  img_size = (32,32)
 
 ):
     '''
@@ -37,11 +44,12 @@ async def calculate_dsrs_radius(
     8. Alpha : default = 
     9. batch: default = 400
     '''
-    
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if form_used["dataset"][0] == "mnist":
         d = 784
         k = 380
         num_classes = 10
+        img_size = (28,28)
     elif form_used["dataset"][0] == "cifar":
         d = 3*32*32
         k = 1530
@@ -65,17 +73,39 @@ async def calculate_dsrs_radius(
         dist1 = "gaussian"
         dist2 = "gaussian"
     
-    classifier = torch.load(denoised_model, map_location=torch.device('cuda' if torch.cuda.is_available() else "cpu"))
-    print(classifier)
-    secure_model = FinishedModel(classifier, d, k, num_classes, dist1,dist2, float(form_used['sigma'][0]),float(sigma_q), float(form_used['alpha'][0]), num_sampling_min = 100)
-    x = torch.randn((28, 28)).float()
+    final_model = DenoisedModel(de,denoised_model,img_size)
+
+    secure_model = FinishedModel(final_model, d, k, num_classes, dist1,dist2, float(form_used['sigma'][0]),float(sigma_q), float(form_used['alpha'][0]), num_sampling_min = 100)
+    noise_level_img = 15
+    noise_level_model = 15
+    y = torch.randn((32, 32, in_nc)).float()
+    img_L = util.uint2single(y)
+    img_L += np.random.normal(0, noise_level_img/255., img_L.shape)
+    img_L = util.single2tensor4(img_L)
+    img_L = torch.cat((img_L, torch.FloatTensor([noise_level_model/255.]).repeat(1, 1, img_L.shape[2], img_L.shape[3])), dim=1)
+    x = img_L.to(device)
     label = secure_model.label_inference_without_certification(x, int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
     logits_old = secure_model.logits_inference_without_certification(x, int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
     logits, r = secure_model.inference_and_certification(x,  int(form_used['N'][0]), 0.01, batch_size = int(form_used['batch_size'][0]))
     model_id = form_used["model_id"]
-    final_path = f"/final_model_weights/final_model_{model_id}"
-    torch.save(final_model,final_path)
+    final_path = f"final_model_weights/final_model_{model_id}.pth"
+    torch.save(secure_model,final_path)
     return r
+
+async def train_denoiser(
+    epochs = 1,
+    in_nc = 4,
+    out_nc = 3,
+    nc = [64,128,256,512],
+    nb = 4,
+    pth = None,
+    model_path = None
+):
+    de=denoiser(in_nc = in_nc,out_nc=out_nc,nc = nc, nb=nb)
+    if model_path:
+        de.ld(model_path)
+    de.train_drunet(epochs,pth)
+    return de.drunet.netG
 
 models = [{
     "name":"test1",
@@ -126,13 +156,26 @@ def calculate_denoised_form():
         print(request.form.get("model_id"))
         model_id = int(request.form.get("model_id"))
         model_dict = models[model_id]
-        
+        print("flag1")
         # TODO: Add option to train denoisers
-        # p1 = subprocess.Popen(['python', 'train.py','-e', '1', '-n', f'{denoised_model}'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # p1 = subprocess.Popen(['python', 'train.py','--epochs', '1', '--in_nc','2','--out_nc','1','--model_name',f'{model_id}','--dataset','mnist/testSample'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # print("flag")
         # out1, err1 = p1.communicate()
+        # print(out1)
         # if err1:
         #     error = 'An error occurred while executing the scripts'
         #     return jsonify({'error': error})
+        # print("flag2")
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        loop = asyncio.get_event_loop()
+
+        # For now images in trainsets/trainH will be used for training of the denoiser
+        in_nc = 4
+        out_nc = 3
+        if model_dict["dataset"][0] == "mnist":
+            in_nc = 2
+            out_nc = 1
+        de = loop.run_until_complete(train_denoiser(in_nc = in_nc,out_nc = out_nc))
         #Execute the second Bash script
         
         denoised_model = f"models/{model_dict['file_name']}"
@@ -143,7 +186,7 @@ def calculate_denoised_form():
          # sample results 
         asyncio.set_event_loop(asyncio.new_event_loop())
         loop = asyncio.get_event_loop()
-        r = loop.run_until_complete(calculate_dsrs_radius(denoised_model, model_dict))
+        r = loop.run_until_complete(calculate_dsrs_radius(denoised_model,de,model_dict,in_nc = out_nc))
         results = [
             {"confidence Radius": r},
         ]

@@ -9,6 +9,7 @@ from collections import OrderedDict
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
+from torchvision import transforms
 
 
 from extra import utils_logger
@@ -81,6 +82,7 @@ class denoiser():
         # init_iter_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
         # opt['path']['pretrained_optimizerG'] = init_path_optimizerG
         # self.current_step = max(init_iter_G, init_iter_optimizerG)
+        self.current_step = 0
 
         # border = opt['scale']
         # # --<--<--<--<--<--<--<--<--<--<--<--<--<-
@@ -132,7 +134,7 @@ class denoiser():
         # 2) creat_dataloader for train and test
         # ----------------------------------------
         if pth is not None:
-            train_set = FDnCNNdata(dataroot_H=pth)
+            train_set = FDnCNNdata(dataroot_H=pth,n_c = self.opt['netG']['in_nc']-1)
             train_size = int(math.ceil(len(train_set) / batch_size))
             print(train_size)
             if self.opt['dist']:
