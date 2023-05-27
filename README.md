@@ -1,4 +1,6 @@
-# Certify-Net
+# AIKavach
+
+Using Randomized Smoothing to get robust models, certifiably!
 
 ## Table of Contents
 
