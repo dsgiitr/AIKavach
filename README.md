@@ -39,7 +39,12 @@ Image demonstrating differences between N-P and DSRS approach taken from [this](
 
 Here,
 
-![Figure Demonstrating DSRS and NP approach](readme_images/equation.png)
+```math
+\begin{align}
+P_A &= f^P(x_0)_{y_0} = Pr_{\epsilon \sim P}[F(x_0+\epsilon) = y_0] \\
+Q_A &= f^Q(x_0)_{y_0} = Pr_{\epsilon \sim P}[F(x_0+\epsilon) = y_0] 
+\end{align}
+```
 
 
  More details can be found in [this](https://arxiv.org/abs/2206.07912) paper.
