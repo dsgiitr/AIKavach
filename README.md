@@ -6,7 +6,7 @@ Using Randomized Smoothing to get robust models, certifiably!
 
 - [Introduction](#introduction)
 - [Motivation](#motivation)
- - [File Structure](#file-structure)
+- [File Structure](#file-structure)
 - [File Description](#file-description)
 - [Installation](#installation)
 - [How to navigate the website](#how-to-navigate-the-website)
@@ -222,13 +222,13 @@ Please ensure your code follows the established coding conventions and includes 
 ## Core Contributors
 
 The list of core contributors to this repository are (mentioned alphabetically):
-1. [Aastha Khaitan](https://github.com/AK1405)
-2. [Aryan Gupta](https://github.com/guptaaryan16)
-3. [Devansh Bhardwaj](https://github.com/FireShadow05)
-4. [Kumar Aman](https://github.com/apophis30)
-5. [Pradnya Shimpi](https://github.com/Pradnya2203)
-6. [Priyanshu Pansari](https://github.com/PriyanshuPansari)
-7. [Sarthak Gupta](https://github.com/mr-sarthakgupta)
+- [Aastha Khaitan](https://github.com/AK1405)
+- [Aryan Gupta](https://github.com/guptaaryan16)
+- [Devansh Bhardwaj](https://github.com/FireShadow05)
+- [Kumar Aman](https://github.com/apophis30)
+- [Pradnya Shimpi](https://github.com/Pradnya2203)
+- [Priyanshu Pansari](https://github.com/PriyanshuPansari)
+- [Sarthak Gupta](https://github.com/mr-sarthakgupta)
 
 ## License
 
